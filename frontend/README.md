@@ -27,7 +27,9 @@ npm install
 npm run dev
 ```
 
-默认会启动 Vite 开发服务器。若 backend 不在默认地址，可通过环境变量覆盖：
+默认会在 `http://localhost:24412` 启动 Vite 开发服务。
+
+若 backend 不在默认地址，可通过环境变量覆盖：
 
 ```bash
 VITE_API_BASE_URL=http://127.0.0.1:8000

@@ -1,4 +1,4 @@
-﻿from functools import lru_cache
+from functools import lru_cache
 import json
 from pathlib import Path
 from typing import Annotated
@@ -19,8 +19,8 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: [
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
+            "http://localhost:24412",
+            "http://127.0.0.1:24412",
         ]
     )
     data_dir: Path = BACKEND_DIR / "data"

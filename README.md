@@ -54,8 +54,8 @@ Copy-Item .env.example .env
 最常用的几个变量：
 
 - `BACKEND_PORT`：宿主机后端端口，默认 `8000`
-- `FRONTEND_PORT`：宿主机前端端口，默认 `5173`
-- `VITE_API_BASE_URL`：前端构建时使用的后端地址，默认 `http://localhost:8000`
+- `FRONTEND_PORT`：宿主机前端端口，默认 `24412`
+- `VITE_API_BASE_URL`：前端构建时使用的 API 基地址，默认留空，前端会走当前站点同源 `/api` 代理
 - `CORS_ORIGINS`：允许访问后端的浏览器来源
 - `SECRET_KEY`：后端 token 签名密钥
 - `DEFAULT_ADMIN_USERNAME`：默认管理员用户名
@@ -67,7 +67,9 @@ Copy-Item .env.example .env
 - `VITE_API_BASE_URL`
 - `CORS_ORIGINS`
 
-这样可以避免前端仍然访问旧地址。
+这样可以避免前端仍然访问旧地址。Docker 部署并需要从局域网、蜂窝网络或公网访问时，建议保持 `VITE_API_BASE_URL` 为空，让前端通过当前站点同源转发到后端。
+
+实际部署经验：在当前 Windows + Docker Desktop + IPv6 DDNS 的使用场景下，前端原默认端口 `5173` 虽然可以本机访问，但蜂窝网络下的外网访问不稳定；改为高位端口 `24412` 后，外网访问恢复正常。因此仓库当前把默认 `FRONTEND_PORT` 调整为 `24412`。如果你需要从手机、局域网或公网访问阅读器，优先直接访问 `http://<你的域名或 IPv6>:24412`，并确保 Windows 防火墙已放行 `24412`。
 
 ### 2. 启动服务
 
@@ -87,7 +89,7 @@ docker compose up --build -d
 
 ### 3. 访问地址
 
-- 前端：`http://localhost:5173`
+- 前端：`http://localhost:24412`
 - 后端接口：`http://localhost:8000`
 - 健康检查：`http://localhost:8000/health`
 - Swagger 文档：`http://localhost:8000/docs`（仅在 `DEBUG=true` 时可用）
@@ -124,6 +126,73 @@ docker compose down
 - 这两个值只会在“默认管理员尚不存在”时生效。
 - 如果数据库已经初始化过，单纯修改 `.env` 不会自动重置已有账号密码。
 - 当前 SQLite 数据库默认保存在 `backend/data/app.db`。如果你是本地测试环境，且确认可以清空已有数据，可以删除该数据库后重新执行 `docker compose up --build -d` 让系统重新初始化。
+
+### 如何维护默认管理员账号
+
+如果数据库里已经存在默认管理员，单纯修改 `.env` 中的 `DEFAULT_ADMIN_USERNAME` 或 `DEFAULT_ADMIN_PASSWORD`，都不会自动改写已有管理员记录。应用启动时也不会替你把旧管理员自动改名；这类操作需要手动运行维护脚本。
+
+当前推荐使用：
+
+```bash
+python scripts/manage_admin_user.py
+```
+
+Docker 部署场景可以直接执行：
+
+```bash
+docker compose exec backend python scripts/manage_admin_user.py
+```
+
+#### 1. 重置当前默认管理员密码
+
+如果数据库中已经存在 `DEFAULT_ADMIN_USERNAME`，脚本会执行 `reset password`：
+
+```bash
+docker compose exec backend python scripts/manage_admin_user.py --password "new-password"
+```
+
+如果不显式传参，脚本会默认读取当前配置中的：
+
+- `DEFAULT_ADMIN_USERNAME`
+- `DEFAULT_ADMIN_PASSWORD`
+
+#### 2. 将旧默认管理员改名为新用户名
+
+如果数据库中不存在当前 `DEFAULT_ADMIN_USERNAME`，但仍存在旧默认管理员（例如 `admin`），脚本会执行 `rename admin`，把旧管理员改名为新用户名，并同步更新密码。
+
+最常见的做法是先在 `.env` 中改好：
+
+- `DEFAULT_ADMIN_USERNAME=contersion`
+- `DEFAULT_ADMIN_PASSWORD=your-new-password`
+
+然后执行：
+
+```bash
+docker compose exec backend python scripts/manage_admin_user.py
+```
+
+如果你希望显式指定旧用户名、新用户名和密码，也可以执行：
+
+```bash
+docker compose exec backend python scripts/manage_admin_user.py --old-username admin --new-username contersion --password "new-password"
+```
+
+本地直接运行后端时，同样适用：
+
+```bash
+python scripts/manage_admin_user.py --old-username admin --new-username contersion --password "new-password"
+```
+
+脚本行为说明：
+
+- 默认读取当前配置中的 `DEFAULT_ADMIN_USERNAME` 和 `DEFAULT_ADMIN_PASSWORD`
+- `--old-username` 和 `--new-username` 用于显式执行管理员改名
+- `--password` 的优先级高于 `.env` / 当前环境变量
+- 如果数据库中已存在当前 `DEFAULT_ADMIN_USERNAME`，脚本只会重置该用户密码
+- 如果当前默认管理员不存在，但旧默认管理员 `admin` 存在，脚本会尝试把 `admin` 改名为新的默认管理员用户名
+- 如果 `new_username` 已存在，脚本不会直接覆盖，而是明确报错提示
+- 如果旧用户名和新用户名都不存在，脚本会明确提示，不会盲目新增多个管理员
+- 脚本只在你手动执行时生效，不会在应用启动时自动改名
 
 ## API 文档与调试说明
 
@@ -167,6 +236,7 @@ docker compose down
 │  │  ├─ init_data.py      # 初始化建库与种子数据
 │  │  └─ main.py           # 后端入口
 │  ├─ tests/               # 后端测试
+│  ├─ scripts/             # 运维/维护脚本，如默认管理员维护
 │  ├─ data/                # SQLite 数据目录（运行期）
 │  ├─ uploads/             # TXT 原始文件与标准化文本（运行期）
 │  ├─ Dockerfile
@@ -340,7 +410,7 @@ docker compose logs -f frontend
 
 默认访问地址是：
 
-- 前端：`http://localhost:5173`
+- 前端：`http://localhost:24412`
 - 后端：`http://localhost:8000`
 
 如果你修改了端口，请确认 `.env` 中的：
@@ -404,6 +474,14 @@ docker compose logs -f frontend
 - `/openapi.json`
 
 如果你是在本地开发、联调或排错，需要重新打开接口文档，可以把项目根目录 `.env` 中的 `DEBUG` 改成 `true`，然后重启后端服务。
+
+### 8. 为什么前端默认端口改成了 `24412`？
+
+这是一次真实部署后的兼容性调整。
+
+在当前 Windows + Docker Desktop + IPv6 DDNS 的部署环境里，项目原本使用的前端默认端口 `5173` 可以在本机正常访问，但蜂窝网络下的外网访问表现不稳定；切换到高位端口 `24412` 后，前端入口恢复正常。因此当前仓库把 `24412` 作为默认前端入口端口。
+
+因为前端已经通过同源 `/api` 代理到后端，所以实际对外优先只需要开放前端端口 `24412`；后端 `8000` 更适合保留给本机调试、内网或受控环境使用。
 
 ## 后续扩展建议
 

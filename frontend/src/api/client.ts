@@ -1,11 +1,38 @@
 import { authTokenStorage } from "../utils/token";
 import type { ApiErrorResponse } from "../types/api";
 
-const rawApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === "string"
-  ? import.meta.env.VITE_API_BASE_URL.trim()
-  : "";
+const LOOPBACK_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
-export const API_BASE_URL = rawApiBaseUrl.replace(/\/$/, "");
+function isLoopbackHostname(hostname: string) {
+  return LOOPBACK_HOSTNAMES.has(hostname.trim().toLowerCase());
+}
+
+function resolveApiBaseUrl() {
+  const rawApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === "string"
+    ? import.meta.env.VITE_API_BASE_URL.trim()
+    : "";
+
+  if (!rawApiBaseUrl) {
+    return "";
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const configuredUrl = new URL(rawApiBaseUrl, window.location.origin);
+      const currentHostname = window.location.hostname;
+
+      if (isLoopbackHostname(configuredUrl.hostname) && !isLoopbackHostname(currentHostname)) {
+        return "";
+      }
+    } catch {
+      // Keep the original value when the URL cannot be parsed.
+    }
+  }
+
+  return rawApiBaseUrl.replace(/\/$/, "");
+}
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 type QueryValue = string | number | boolean | null | undefined;
 type RequestBody = BodyInit | FormData | URLSearchParams | object | null | undefined;
