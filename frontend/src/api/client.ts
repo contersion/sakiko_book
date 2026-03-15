@@ -1,7 +1,11 @@
-﻿import { authTokenStorage } from "../utils/token";
+import { authTokenStorage } from "../utils/token";
 import type { ApiErrorResponse } from "../types/api";
 
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8000").replace(/\/$/, "");
+const rawApiBaseUrl = typeof import.meta.env.VITE_API_BASE_URL === "string"
+  ? import.meta.env.VITE_API_BASE_URL.trim()
+  : "";
+
+export const API_BASE_URL = rawApiBaseUrl.replace(/\/$/, "");
 
 type QueryValue = string | number | boolean | null | undefined;
 type RequestBody = BodyInit | FormData | URLSearchParams | object | null | undefined;
@@ -58,7 +62,10 @@ function formatErrorDetail(detail: ApiErrorResponse["detail"]) {
 }
 
 function buildUrl(path: string, query?: Record<string, QueryValue>) {
-  const url = new URL(`${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`);
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const url = API_BASE_URL
+    ? new URL(`${API_BASE_URL}${normalizedPath}`)
+    : new URL(normalizedPath, typeof window === "undefined" ? "http://127.0.0.1" : window.location.origin);
 
   Object.entries(query || {}).forEach(([key, value]) => {
     if (value === null || value === undefined || value === "") {
