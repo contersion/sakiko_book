@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="bookshelf-page">
     <header class="bookshelf-page__header">
       <div class="bookshelf-page__title-wrap">
@@ -15,6 +15,7 @@
           {{ isEditMode ? "完成" : "编辑" }}
         </n-button>
         <n-upload
+          ref="uploadRef"
           accept=".txt,text/plain"
           :show-file-list="false"
           :max="1"
@@ -216,6 +217,7 @@ import {
   NTag,
   NUpload,
   useMessage,
+  type UploadInst,
   type UploadCustomRequestOptions,
 } from "naive-ui";
 import { useRouter } from "vue-router";
@@ -230,6 +232,7 @@ import { clampPercentage, formatDateTime, formatNumber, formatPercent, formatWor
 
 const router = useRouter();
 const message = useMessage();
+const uploadRef = ref<UploadInst | null>(null);
 const books = ref<BookShelfItem[]>([]);
 const groups = ref<BookGroup[]>([]);
 const searchKeyword = ref("");
@@ -324,6 +327,10 @@ function getCoverLetter(title: string) {
 
 function continueLabel(book: BookShelfItem) {
   return clampPercentage(book.progress_percent) > 0 ? "继续阅读" : "开始阅读";
+}
+
+function resetUploadControl() {
+  uploadRef.value?.clear();
 }
 
 async function loadBooks(search = searchKeyword.value.trim()) {
@@ -427,6 +434,7 @@ async function handleUpload(options: UploadCustomRequestOptions) {
   if (!(file instanceof File)) {
     const error = new Error("未找到可上传的文件内容");
     options.onError?.();
+    resetUploadControl();
     message.error(error.message);
     return;
   }
@@ -443,6 +451,7 @@ async function handleUpload(options: UploadCustomRequestOptions) {
     message.error(getErrorMessage(error));
   } finally {
     uploading.value = false;
+    resetUploadControl();
   }
 }
 
