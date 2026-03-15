@@ -125,7 +125,7 @@ docker compose up -d
 - 如果数据库已经初始化过，单纯修改 `.env` 不会自动重置已有账号密码。
 - 当前 SQLite 数据库默认保存在 `backend/data/app.db`。如果你是本地测试环境，且确认可以清空已有数据，可以删除该数据库后重新执行 `docker compose up --build -d` 让系统重新初始化。
 
-### 如何维护默认管理员账号
+**如何维护默认管理员账号**
 
 如果数据库里已经存在默认管理员，单纯修改 `.env` 中的 `DEFAULT_ADMIN_USERNAME` 或 `DEFAULT_ADMIN_PASSWORD`，都不会自动改写已有管理员记录。应用启动时也不会替你把旧管理员自动改名；这类操作需要手动运行维护脚本。
 
@@ -141,7 +141,7 @@ Docker 部署场景可以直接执行：
 docker compose exec backend python scripts/manage_admin_user.py
 ```
 
-#### 1. 重置当前默认管理员密码
+**重置当前默认管理员密码**
 
 如果数据库中已经存在 `DEFAULT_ADMIN_USERNAME`，脚本会执行 `reset password`：
 
@@ -154,7 +154,7 @@ docker compose exec backend python scripts/manage_admin_user.py --password "new-
 - `DEFAULT_ADMIN_USERNAME`
 - `DEFAULT_ADMIN_PASSWORD`
 
-#### 2. 将旧默认管理员改名为新用户名
+**将旧默认管理员改名为新用户名**
 
 如果数据库中不存在当前 `DEFAULT_ADMIN_USERNAME`，但仍存在旧默认管理员（例如 `admin`），脚本会执行 `rename admin`，把旧管理员改名为新用户名，并同步更新密码。
 
