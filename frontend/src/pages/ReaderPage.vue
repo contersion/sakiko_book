@@ -1,12 +1,13 @@
 <template>
-  <div
-    class="reader-page"
-    :class="[
-      `reader-page--${preferences.theme}`,
-      { 'reader-page--compact': isCompactViewport },
-    ]"
-    :style="readerStyleVars"
-  >
+  <n-config-provider abstract :theme="naiveTheme">
+    <div
+      class="reader-page"
+      :class="[
+        readerThemeClass,
+        { 'reader-page--compact': isCompactViewport },
+      ]"
+      :style="readerStyleVars"
+    >
     <div v-if="loading" class="reader-loading">
       <section class="reader-glass reader-loading__panel reader-loading__panel--rail">
         <n-skeleton text :repeat="3" />
@@ -186,7 +187,8 @@
     <n-drawer v-model:show="isDrawerOpen" placement="left" :width="drawerWidth">
       <n-drawer-content :title="drawerTitle" closable body-content-style="padding: 20px;">
         <template v-if="activeDrawer === 'catalog'">
-          <div class="reader-drawer__summary">
+          <div class="reader-drawer__surface" :class="readerThemeClass">
+            <div class="reader-drawer__summary">
             <div>
               <span>{{ currentChapterPositionLabel }}</span>
               <strong>{{ progressPercentLabel }}</strong>
@@ -203,7 +205,7 @@
             class="reader-drawer__progress"
           />
 
-          <div ref="catalogListRef" class="reader-catalog__list reader-catalog__list--drawer">
+            <div ref="catalogListRef" class="reader-catalog__list reader-catalog__list--drawer">
             <button
               v-for="chapter in chapters"
               :key="`drawer-${chapter.id}`"
@@ -218,11 +220,13 @@
               <span class="reader-catalog__index">{{ formatChapterOrdinal(chapter.chapter_index) }}</span>
               <strong class="reader-catalog__title">{{ chapter.chapter_title }}</strong>
             </button>
+            </div>
           </div>
         </template>
 
         <template v-else>
-          <div class="reader-settings">
+          <div class="reader-drawer__surface" :class="readerThemeClass">
+            <div class="reader-settings">
             <section class="reader-settings__group">
               <div class="reader-settings__label-row">
                 <span>字体大小</span>
@@ -244,6 +248,7 @@
                 <span>阅读主题</span>
                 <strong>{{ preferences.theme === 'dark' ? '深色' : '浅色' }}</strong>
               </div>
+              <div class="reader-settings__theme-mode">{{ readerThemeLabel }}</div>
               <n-radio-group v-model:value="preferences.theme" name="reader-theme">
                 <n-space>
                   <n-radio-button value="light">浅色</n-radio-button>
@@ -275,11 +280,13 @@
               </div>
               <n-slider v-model:value="preferences.contentWidth" :step="1" :min="56" :max="96" />
             </section>
+            </div>
           </div>
         </template>
       </n-drawer-content>
     </n-drawer>
-  </div>
+    </div>
+  </n-config-provider>
 </template>
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from "vue";
@@ -287,6 +294,7 @@ import type { ComponentPublicInstance } from "vue";
 import {
   NAlert,
   NButton,
+  NConfigProvider,
   NDrawer,
   NDrawerContent,
   NProgress,
@@ -295,6 +303,7 @@ import {
   NSkeleton,
   NSlider,
   NSpace,
+  darkTheme,
 } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 
@@ -376,6 +385,9 @@ let catalogScrollToken = 0;
 const isCompactViewport = computed(() => viewportWidth.value <= COMPACT_BREAKPOINT);
 const shouldShowChrome = computed(() => !isCompactViewport.value || mobileChromeVisible.value);
 const progressPercentLabel = computed(() => formatPercent(currentProgressPercent.value));
+const readerThemeClass = computed(() => `reader-page--${preferences.theme}`);
+const readerThemeLabel = computed(() => (preferences.theme === "dark" ? "黑夜模式" : "白天模式"));
+const naiveTheme = computed(() => (preferences.theme === "dark" ? darkTheme : null));
 const drawerTitle = computed(() => (activeDrawer.value === "settings" ? "阅读设置" : "章节目录"));
 const drawerWidth = computed(() => Math.min(Math.max(viewportWidth.value - 24, 280), 380));
 const isDrawerOpen = computed({
@@ -1243,6 +1255,7 @@ function goBack() {
 }
 
 .reader-page--light {
+  color-scheme: light;
   --reader-page-bg: linear-gradient(180deg, #f7efe2 0%, #efe3d0 100%);
   --reader-panel-bg: rgba(255, 250, 243, 0.74);
   --reader-panel-border: rgba(109, 90, 74, 0.12);
@@ -1264,6 +1277,7 @@ function goBack() {
 }
 
 .reader-page--dark {
+  color-scheme: dark;
   --reader-page-bg: linear-gradient(180deg, #171411 0%, #0e0c0a 100%);
   --reader-panel-bg: rgba(34, 29, 24, 0.72);
   --reader-panel-border: rgba(243, 230, 215, 0.09);
@@ -1617,6 +1631,10 @@ function goBack() {
   gap: 8px;
 }
 
+.reader-drawer__surface {
+  color: var(--reader-body);
+}
+
 .reader-drawer__progress {
   margin-top: 18px;
 }
@@ -1689,6 +1707,11 @@ function goBack() {
   justify-content: space-between;
   gap: 12px;
   align-items: baseline;
+}
+
+.reader-settings__theme-mode {
+  color: var(--reader-muted);
+  font-size: 13px;
 }
 
 .reader-settings__label-row span {
