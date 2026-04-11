@@ -1278,13 +1278,14 @@ function goBack() {
 
 .reader-page--dark {
   color-scheme: dark;
-  --reader-page-bg: linear-gradient(180deg, #171411 0%, #0e0c0a 100%);
-  --reader-panel-bg: rgba(34, 29, 24, 0.72);
+  background: var(--reader-page-bg);
+  --reader-page-bg: linear-gradient(180deg, #121212 0%, #101010 100%);
+  --reader-panel-bg: rgba(24, 24, 24, 0.94);
   --reader-panel-border: rgba(243, 230, 215, 0.09);
   --reader-panel-shadow: 0 24px 64px rgba(0, 0, 0, 0.38);
   --reader-paper-bg:
-    linear-gradient(180deg, rgba(35, 30, 25, 0.92), rgba(24, 20, 17, 0.98)),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+    linear-gradient(180deg, rgba(22, 22, 22, 0.98), rgba(22, 22, 22, 0.98)),
+    linear-gradient(135deg, rgba(22, 22, 22, 0.98), rgba(22, 22, 22, 0.98));
   --reader-paper-border: rgba(243, 230, 215, 0.08);
   --reader-paper-shadow: 0 34px 88px rgba(0, 0, 0, 0.42);
   --reader-heading: #f3e7d9;
@@ -1296,6 +1297,14 @@ function goBack() {
   --reader-action-hover: rgba(255, 255, 255, 0.08);
   --reader-settings-bg: rgba(255, 255, 255, 0.04);
   --reader-settings-border: rgba(243, 230, 215, 0.08);
+}
+
+.reader-page--dark .reader-glass {
+  backdrop-filter: none;
+}
+
+.reader-page--dark .reader-paper::before {
+  display: none;
 }
 
 .reader-shell {
