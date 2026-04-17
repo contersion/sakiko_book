@@ -28,6 +28,7 @@ build/
 
 # Project-local AI memory
 .claude/engram/
+.claude/settings.local.json
 
 # Local cache
 .uv-cache/
