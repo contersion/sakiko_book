@@ -35,8 +35,10 @@ export const booksApi = {
   updateMetadata(bookId: number, payload: BookMetadataPayload) {
     return apiClient.patch<BookDetail>(`/api/books/${bookId}`, payload);
   },
-  chapters(bookId: number) {
-    return apiClient.get<BookChapter[]>(`/api/books/${bookId}/chapters`);
+  chapters(bookId: number, skip?: number, limit?: number) {
+    return apiClient.get<BookChapter[]>(`/api/books/${bookId}/chapters`, {
+      query: skip !== undefined ? { skip, limit } : undefined,
+    });
   },
   chapterContent(bookId: number, chapterIndex: number) {
     return apiClient.get<BookChapterContent>(`/api/books/${bookId}/chapters/${chapterIndex}`);

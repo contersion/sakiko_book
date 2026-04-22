@@ -227,21 +227,33 @@
             ></div>
           </div>
 
-            <div ref="catalogListRef" class="reader-catalog__list reader-catalog__list--drawer">
-            <button
-              v-for="chapter in chapters"
-              :key="`drawer-${chapter.id}`"
-              type="button"
-              class="reader-catalog__item"
-              :ref="(element) => setCatalogItemRef(chapter.chapter_index, element)"
-              :class="{
-                'reader-catalog__item--active': chapter.chapter_index === currentChapterIndex,
-              }"
-              @click="handleChapterSelect(chapter.chapter_index)"
+            <div
+              ref="catalogListRef"
+              class="reader-catalog__list reader-catalog__list--drawer"
+              @scroll="handleCatalogScroll"
             >
-              <span class="reader-catalog__index">{{ formatChapterOrdinal(chapter.chapter_index) }}</span>
-              <strong class="reader-catalog__title">{{ chapter.chapter_title }}</strong>
-            </button>
+              <div
+                v-if="chapters.length > 200"
+                :style="{ height: catalogTopPadding + 'px' }"
+              />
+              <button
+                v-for="chapter in catalogVisibleChapters"
+                :key="`drawer-${chapter.id}`"
+                type="button"
+                class="reader-catalog__item"
+                :ref="(element) => setCatalogItemRef(chapter.chapter_index, element)"
+                :class="{
+                  'reader-catalog__item--active': chapter.chapter_index === currentChapterIndex,
+                }"
+                @click="handleChapterSelect(chapter.chapter_index)"
+              >
+                <span class="reader-catalog__index">{{ formatChapterOrdinal(chapter.chapter_index) }}</span>
+                <strong class="reader-catalog__title">{{ chapter.chapter_title }}</strong>
+              </button>
+              <div
+                v-if="chapters.length > 200"
+                :style="{ height: catalogBottomPadding + 'px' }"
+              />
             </div>
           </div>
         </template>
@@ -353,6 +365,8 @@ const READER_SCROLL_ANCHOR = 120;
 const COMPACT_BREAKPOINT = 980;
 const MOBILE_CONTENT_WIDTH_MIN_PERCENT = 84;
 const MOBILE_CONTENT_WIDTH_MAX_PERCENT = 100;
+const CATALOG_ITEM_ESTIMATED_HEIGHT = 82;
+const CATALOG_OVERSCAN = 8;
 
 type ProgressSnapshot = ReadingProgressPayload;
 type ReaderDrawerView = "catalog" | "settings";
@@ -417,6 +431,8 @@ const activeDrawer = ref<ReaderDrawerView | null>(null);
 const mobileChromeVisible = ref(false);
 const viewportWidth = ref(COMPACT_BREAKPOINT + 200);
 const catalogItemRefs = new Map<number, HTMLElement>();
+const catalogScrollTop = ref(0);
+const catalogListHeight = ref(0);
 
 let progressSaveTimer: ReturnType<typeof setTimeout> | null = null;
 let saveInFlight = false;
@@ -536,6 +552,33 @@ const readerStyleVars = computed(() => ({
   "--reader-content-width-mobile": `${mapReaderContentWidthForMobile(preferences.contentWidth)}%`,
 }));
 
+const catalogVirtualStart = computed(() => {
+  const start = Math.floor(catalogScrollTop.value / CATALOG_ITEM_ESTIMATED_HEIGHT);
+  return Math.max(0, start - CATALOG_OVERSCAN);
+});
+
+const catalogVirtualEnd = computed(() => {
+  if (catalogListHeight.value <= 0) {
+    return chapters.value.length;
+  }
+  const visibleCount = Math.ceil(catalogListHeight.value / CATALOG_ITEM_ESTIMATED_HEIGHT);
+  const end = catalogVirtualStart.value + visibleCount + CATALOG_OVERSCAN * 2;
+  return Math.min(chapters.value.length, end);
+});
+
+const catalogVisibleChapters = computed(() => {
+  if (chapters.value.length <= 200) {
+    return chapters.value;
+  }
+  return chapters.value.slice(catalogVirtualStart.value, catalogVirtualEnd.value);
+});
+
+const catalogTopPadding = computed(() => catalogVirtualStart.value * CATALOG_ITEM_ESTIMATED_HEIGHT);
+
+const catalogBottomPadding = computed(() =>
+  Math.max(0, (chapters.value.length - catalogVirtualEnd.value) * CATALOG_ITEM_ESTIMATED_HEIGHT)
+);
+
 watch(
   preferences,
   (value) => {
@@ -586,6 +629,13 @@ watch(
     }
 
     void scheduleCatalogAutoScroll();
+  },
+);
+
+watch(
+  () => catalogVirtualStart.value,
+  () => {
+    catalogItemRefs.clear();
   },
 );
 
@@ -816,6 +866,12 @@ function syncViewportState() {
   }
 }
 
+function handleCatalogScroll(event: Event) {
+  const target = event.target as HTMLElement;
+  catalogScrollTop.value = target.scrollTop;
+  catalogListHeight.value = target.clientHeight;
+}
+
 function handleWindowResize() {
   syncViewportState();
 }
@@ -867,18 +923,26 @@ async function scheduleCatalogAutoScroll() {
 
 function scrollCatalogToCurrentChapter() {
   const catalogList = catalogListRef.value;
-  const currentChapterElement = catalogItemRefs.get(currentChapterIndex.value);
-
-  if (!catalogList || !currentChapterElement) {
+  if (!catalogList) {
     return;
   }
 
-  // 当前章节不存在时安全降级；存在时尽量滚到容器中部，减少手动翻找。
-  currentChapterElement.scrollIntoView({
-    block: "center",
-    inline: "nearest",
-    behavior: "auto",
-  });
+  const currentChapterElement = catalogItemRefs.get(currentChapterIndex.value);
+
+  if (currentChapterElement) {
+    currentChapterElement.scrollIntoView({
+      block: "center",
+      inline: "nearest",
+      behavior: "auto",
+    });
+    return;
+  }
+
+  // 虚拟滚动模式下当前项未挂载，手动计算滚动位置
+  if (chapters.value.length > 200) {
+    const targetTop = currentChapterIndex.value * CATALOG_ITEM_ESTIMATED_HEIGHT;
+    catalogList.scrollTop = Math.max(0, targetTop - catalogListHeight.value / 2 + CATALOG_ITEM_ESTIMATED_HEIGHT / 2);
+  }
 }
 
 function handleReadingSurfaceTap() {

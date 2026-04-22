@@ -261,9 +261,15 @@ def delete_book(book_id: int, current_user: CurrentUser, db: Session = Depends(g
 
 
 @router.get("/{book_id}/chapters", response_model=list[BookChapterRead])
-def get_book_chapters(book_id: int, current_user: CurrentUser, db: Session = Depends(get_db)) -> list[BookChapterRead]:
+def get_book_chapters(
+    book_id: int,
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+    skip: int = Query(default=0, ge=0),
+    limit: int | None = Query(default=None, ge=1),
+) -> list[BookChapterRead]:
     try:
-        chapters = list_user_book_chapters(db, current_user.id, book_id)
+        chapters = list_user_book_chapters(db, current_user.id, book_id, skip=skip, limit=limit)
     except BookNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 

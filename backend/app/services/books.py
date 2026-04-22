@@ -120,13 +120,18 @@ def get_user_book_detail(db: Session, user_id: int, book_id: int) -> dict[str, o
     return _serialize_book_detail(book, progress)
 
 
-def list_user_book_chapters(db: Session, user_id: int, book_id: int) -> list[BookChapter]:
+def list_user_book_chapters(
+    db: Session, user_id: int, book_id: int, skip: int = 0, limit: int | None = None
+) -> list[BookChapter]:
     book = get_user_book(db, user_id, book_id)
     statement = (
         select(BookChapter)
         .where(BookChapter.book_id == book.id)
         .order_by(BookChapter.chapter_index.asc())
+        .offset(skip)
     )
+    if limit is not None:
+        statement = statement.limit(limit)
     return list(db.execute(statement).scalars().all())
 
 
@@ -209,11 +214,21 @@ def read_book_text(book: Book) -> str:
 
 
 def read_book_chapter_content(book: Book, chapter: BookChapter) -> str:
-    text = read_book_text(book)
-    text_length = len(text)
-    start_offset = max(0, min(chapter.start_offset, text_length))
-    end_offset = max(start_offset, min(chapter.end_offset, text_length))
-    return text[start_offset:end_offset]
+    try:
+        with open(book.file_path, "r", encoding=book.encoding) as f:
+            start_offset = max(0, chapter.start_offset)
+            if start_offset > 0:
+                skipped = f.read(start_offset)
+                if len(skipped) < start_offset:
+                    return ""
+            content_length = max(0, chapter.end_offset - start_offset)
+            return f.read(content_length)
+    except FileNotFoundError as exc:
+        raise BookReadError("Book file not found") from exc
+    except UnicodeDecodeError as exc:
+        raise BookReadError("Failed to decode book file with stored encoding") from exc
+    except OSError as exc:
+        raise BookReadError(f"Failed to read book file: {exc}") from exc
 
 
 def upload_user_book_cover(
