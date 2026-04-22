@@ -1,6 +1,6 @@
 # Frontend
 
-TXT Reader 前端基于 Vue 3 + Vite + TypeScript，负责登录、书架、书籍详情、阅读页和目录规则管理。
+初华的书 前端基于 Vue 3 + Vite + TypeScript，负责登录、书架、书籍详情、阅读页和目录规则管理。
 
 ## 技术栈
 

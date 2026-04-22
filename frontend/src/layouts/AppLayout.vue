@@ -5,9 +5,9 @@
       class="app-layout__header"
     >
       <div class="app-layout__brand">
-        <div class="app-layout__badge">TXT</div>
+        <img class="app-layout__logo" src="/icon-192.png" alt="初华的书" />
         <div>
-          <div class="app-layout__title">TXT Reader</div>
+          <div class="app-layout__title">初华的书</div>
           <div class="app-layout__subtitle">个人在线阅读器</div>
         </div>
       </div>
@@ -130,17 +130,12 @@ function handleToggleTheme() {
   gap: 14px;
 }
 
-.app-layout__badge {
-  display: grid;
-  place-items: center;
+.app-layout__logo {
   width: 48px;
   height: 48px;
   border-radius: 16px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: white;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  box-shadow: 0 12px 24px rgba(244, 164, 180, 0.28);
+  object-fit: cover;
+  box-shadow: 0 12px 24px rgba(74, 159, 217, 0.28);
 }
 
 .app-layout__title {

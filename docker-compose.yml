@@ -5,7 +5,7 @@ services:
     container_name: txt-reader-backend-refactor
     restart: unless-stopped
     environment:
-      APP_NAME: ${APP_NAME:-TXT Reader API}
+      APP_NAME: ${APP_NAME:-初华的书 API}
       APP_VERSION: ${APP_VERSION:-0.1.0}
       DEBUG: ${DEBUG:-false}
       HOST: 0.0.0.0
