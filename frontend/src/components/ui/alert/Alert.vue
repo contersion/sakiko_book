@@ -2,11 +2,11 @@
   <div
     :class="cn(
       'relative w-full rounded-lg border p-4 text-sm',
-      variant === 'default' && 'bg-gray-50 text-gray-900 border-gray-200',
-      variant === 'destructive' && 'bg-red-50 text-red-700 border-red-200',
-      variant === 'info' && 'bg-blue-50 text-blue-700 border-blue-200',
-      variant === 'warning' && 'bg-amber-50 text-amber-700 border-amber-200',
-      variant === 'success' && 'bg-green-50 text-green-700 border-green-200',
+      variant === 'default' && 'bg-[var(--alert-default-bg)] text-[var(--alert-default-text)] border-[var(--alert-default-border)]',
+      variant === 'destructive' && 'bg-[var(--alert-destructive-bg)] text-[var(--alert-destructive-text)] border-[var(--alert-destructive-border)]',
+      variant === 'info' && 'bg-[var(--alert-info-bg)] text-[var(--alert-info-text)] border-[var(--alert-info-border)]',
+      variant === 'warning' && 'bg-[var(--alert-warning-bg)] text-[var(--alert-warning-text)] border-[var(--alert-warning-border)]',
+      variant === 'success' && 'bg-[var(--alert-success-bg)] text-[var(--alert-success-text)] border-[var(--alert-success-border)]',
       $attrs.class ?? ''
     )"
   >

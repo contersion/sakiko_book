@@ -102,6 +102,22 @@
   --badge-destructive-hover: #fecaca;
   --badge-outline-text: #111827;
   --badge-outline-border: #e5e7eb;
+  /* Alert 颜色 */
+  --alert-default-bg: #f9fafb;
+  --alert-default-text: #111827;
+  --alert-default-border: #e5e7eb;
+  --alert-destructive-bg: #fef2f2;
+  --alert-destructive-text: #b91c1c;
+  --alert-destructive-border: #fecaca;
+  --alert-info-bg: #eff6ff;
+  --alert-info-text: #1d4ed8;
+  --alert-info-border: #bfdbfe;
+  --alert-warning-bg: #fffbeb;
+  --alert-warning-text: #b45309;
+  --alert-warning-border: #fde68a;
+  --alert-success-bg: #f0fdf4;
+  --alert-success-text: #15803d;
+  --alert-success-border: #bbf7d0;
 }
 
 body.app-theme--dark {
@@ -175,6 +191,22 @@ body.app-theme--dark {
   --badge-destructive-hover: rgba(239, 68, 68, 0.22);
   --badge-outline-text: var(--text-primary);
   --badge-outline-border: rgba(255, 143, 171, 0.25);
+  /* Alert 暗色模式 */
+  --alert-default-bg: rgba(255, 255, 255, 0.05);
+  --alert-default-text: var(--text-primary);
+  --alert-default-border: rgba(255, 255, 255, 0.08);
+  --alert-destructive-bg: rgba(239, 68, 68, 0.12);
+  --alert-destructive-text: #fca5a5;
+  --alert-destructive-border: rgba(239, 68, 68, 0.25);
+  --alert-info-bg: rgba(59, 130, 246, 0.12);
+  --alert-info-text: #93c5fd;
+  --alert-info-border: rgba(59, 130, 246, 0.25);
+  --alert-warning-bg: rgba(245, 158, 11, 0.12);
+  --alert-warning-text: #fcd34d;
+  --alert-warning-border: rgba(245, 158, 11, 0.25);
+  --alert-success-bg: rgba(34, 197, 94, 0.12);
+  --alert-success-text: #86efac;
+  --alert-success-border: rgba(34, 197, 94, 0.25);
 }
 
 body.app-theme--light {
@@ -319,4 +351,18 @@ body.app-theme--dark .bookshelf-page__filter-actions input {
 
 body.app-theme--dark .rule-table tbody tr:hover {
   background: rgba(255, 143, 171, 0.06);
+}
+
+body.app-theme--dark .login-page__card {
+  color: var(--text-primary);
+}
+
+body.app-theme--dark .login-page__card input {
+  background: var(--surface-input-bg);
+  border-color: var(--border-color-soft);
+  color: var(--text-primary);
+}
+
+body.app-theme--dark .login-page__card input::placeholder {
+  color: var(--text-secondary);
 }
