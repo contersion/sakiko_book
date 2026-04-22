@@ -7,10 +7,10 @@ export const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-transparent bg-gray-900 text-white hover:bg-gray-800",
-        secondary: "border-transparent bg-gray-100 text-gray-900 hover:bg-gray-200",
-        destructive: "border-transparent bg-red-100 text-red-700 hover:bg-red-200",
-        outline: "text-gray-900 border-gray-200",
+        default: "border-transparent bg-[var(--badge-default-bg)] text-[var(--badge-default-text)] hover:bg-[var(--badge-default-hover)]",
+        secondary: "border-transparent bg-[var(--badge-secondary-bg)] text-[var(--badge-secondary-text)] hover:bg-[var(--badge-secondary-hover)]",
+        destructive: "border-transparent bg-[var(--badge-destructive-bg)] text-[var(--badge-destructive-text)] hover:bg-[var(--badge-destructive-hover)]",
+        outline: "text-[var(--badge-outline-text)] border-[var(--badge-outline-border)]",
       },
     },
     defaultVariants: {

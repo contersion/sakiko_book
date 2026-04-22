@@ -90,6 +90,18 @@
   --button-link-text: #111827;
   --button-link-bg: transparent;
   --button-link-hover-bg: transparent;
+  /* Badge 颜色 */
+  --badge-default-bg: #111827;
+  --badge-default-text: #ffffff;
+  --badge-default-hover: #1f2937;
+  --badge-secondary-bg: #f3f4f6;
+  --badge-secondary-text: #111827;
+  --badge-secondary-hover: #e5e7eb;
+  --badge-destructive-bg: #fee2e2;
+  --badge-destructive-text: #b91c1c;
+  --badge-destructive-hover: #fecaca;
+  --badge-outline-text: #111827;
+  --badge-outline-border: #e5e7eb;
 }
 
 body.app-theme--dark {
@@ -151,6 +163,18 @@ body.app-theme--dark {
   --button-link-text: var(--primary-color);
   --button-link-bg: rgba(255, 143, 171, 0.08);
   --button-link-hover-bg: rgba(255, 143, 171, 0.14);
+  /* Badge 暗色模式 */
+  --badge-default-bg: var(--primary-color);
+  --badge-default-text: var(--app-shell-color);
+  --badge-default-hover: #ff9eb8;
+  --badge-secondary-bg: rgba(255, 255, 255, 0.08);
+  --badge-secondary-text: var(--text-primary);
+  --badge-secondary-hover: rgba(255, 255, 255, 0.13);
+  --badge-destructive-bg: rgba(239, 68, 68, 0.15);
+  --badge-destructive-text: #fca5a5;
+  --badge-destructive-hover: rgba(239, 68, 68, 0.22);
+  --badge-outline-text: var(--text-primary);
+  --badge-outline-border: rgba(255, 143, 171, 0.25);
 }
 
 body.app-theme--light {
@@ -285,4 +309,14 @@ body.app-theme--dark .metadata-modal__cover {
   border-color: var(--border-color-soft);
   background: var(--surface-cover-bg);
   color: var(--text-secondary);
+}
+
+body.app-theme--dark .bookshelf-page__filter-actions input {
+  background: var(--surface-input-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color-soft);
+}
+
+body.app-theme--dark .rule-table tbody tr:hover {
+  background: rgba(255, 143, 171, 0.06);
 }

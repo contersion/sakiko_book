@@ -1754,7 +1754,7 @@ onUnmounted(() => {
 }
 
 .rule-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(244, 164, 180, 0.14);
 }
 
 .rule-table tbody tr:last-child td {
