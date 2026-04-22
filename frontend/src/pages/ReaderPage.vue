@@ -1837,6 +1837,23 @@ function goToBookshelf() {
   margin-top: 18px;
 }
 
+.reader-catalog__list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.reader-catalog__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.reader-catalog__list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.reader-catalog__list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
 .reader-catalog__item {
   display: grid;
   gap: 6px;
