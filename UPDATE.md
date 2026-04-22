@@ -1,3 +1,54 @@
+## v1.08
+
+Date
+`2026-04-22`
+
+Summary
+本次版本包含两大主题更新：
+1. 日间模式整体配色从粉白单一色调升级为「水色天空蓝 + 樱花粉」的二次元蓝粉配色，并进一步加深饱和度，提升视觉辨识度。
+2. 项目正式支持 PWA（Progressive Web App），应用名称「初华的书」，可安装为安卓 fullscreen 沉浸式全屏应用。
+
+Frontend
+- 日间模式蓝粉配色重构（饱和度加深版）：
+  - 核心变量文件 `index.css` 全面替换：
+    - 背景渐变：`#FFF5F7→#FFF0F3`（粉白）→ `#D6ECFA→#F0DEE8`（天空蓝→樱花粉，加深版）。
+    - 主色（Primary）：`#F4A4B4`（樱花粉）→ `#4A9FD9`（更深更饱和的天空蓝）。
+    - 强调色（Accent）：`#C9B1FF`（薰衣草紫）→ `#F4A4B4`（樱花粉保留）。
+    - 文字色：`#2D2D2D/#5A5A5A` → `#2D3A4A/#5A6A7A`（蓝灰系）。
+    - 按钮主色：`#111827`（近黑）→ `#4A9FD9`（蓝色），hover `#3B8FD4`。
+    - 滑块填充、边框、阴影、标签页、选中文本：全部从粉色系迁移为蓝色系。
+  - 阅读页 `ReaderPage.vue` light 主题同步：背景、面板、纸张、光晕、进度条轨道、滚动条、文字色全部适配蓝粉。
+  - 书架页 `BookshelfPage.vue`：工具栏光晕（左上蓝+右下粉）、标签页 hover/active、卡片 hover 边框、封面渐变、徽章背景、进度条轨道。
+  - 书籍详情页 `BookDetailPage.vue`：hero 光晕、封面渐变（蓝→粉）、eyebrow 背景、modal 封面。
+  - 规则管理页 `RuleManagementPage.vue`：hero 光晕、eyebrow、代码块、radio active、表格 hover。
+  - 登录页 `LoginPage.vue`：intro 光晕。
+  - 组件级异常颜色清理：
+    - `ChapterCatalogModalDrawer.vue`：棕色边框 `rgba(109,90,74,…)` → 蓝色；绿色渐变 `rgba(52,107,97,…)` → 蓝色。
+    - `BookGroupManagerModal.vue` / `BookGroupSelectorModal.vue`：棕色边框 → 蓝色。
+  - Shadcn 组件 hardcoded gray 修复：
+    - `Card.vue`：`border-gray-200` / `text-gray-900` → CSS 变量。
+    - `TabsList.vue`：`bg-gray-100` / `text-gray-500` → CSS 变量。
+    - `TabsTrigger.vue`：`focus-visible:ring-gray-400` / `data-[state=active]:text-gray-900` → CSS 变量。
+    - `Input.vue`：`border-gray-200` / `placeholder:text-gray-400` / `focus-visible:ring-gray-400` → CSS 变量。
+- PWA 全屏应用配置：
+  - 安装 `vite-plugin-pwa` 并集成到 `vite.config.ts`。
+  - 自动生成 Service Worker（`sw.js` + `workbox`），静态资源离线缓存，API 不缓存。
+  - Web App Manifest：`name: "初华的书"`，`display: fullscreen`，`theme_color: #4A9FD9`，`background_color: #D6ECFA`。
+  - 图标生成：基于用户提供图片生成 `icon-192.png`、`icon-512.png`、`apple-touch-icon.png`、`favicon.png`。
+  - `index.html` 更新：`viewport-fit=cover`、theme-color、apple-mobile-web-app 标签、favicon。
+  - CSS 安全区域适配：body 添加 `env(safe-area-inset-top/bottom/left/right)`，防止刘海和底部手势条遮挡内容。
+
+Build
+- 前端 `npm run build` 零错误通过，`manifest.webmanifest`、`sw.js`、`registerSW.js` 均正常生成。
+- 新增依赖：`vite-plugin-pwa`。
+
+Verification
+- Docker 前端镜像重建验证通过：
+  - `docker compose up -d --build`
+  - 前端 `http://localhost:21413` 正常访问
+  - 后端 `http://localhost:9000` 正常访问
+  - PWA 产物（manifest.webmanifest / sw.js / workbox-*.js）正确输出到 dist
+
 ## v1.07
 
 Date
