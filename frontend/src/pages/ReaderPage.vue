@@ -350,6 +350,7 @@ import { useRoute, useRouter } from "vue-router";
 import { booksApi } from "../api/books";
 import { ApiError, buildApiUrl, getErrorMessage, resolveApiAssetUrl } from "../api/client";
 import { usePreferencesStore } from "../stores/preferences";
+import { useBooksCacheStore } from "../stores/booksCache";
 import type {
   BookChapter,
   BookChapterContent,
@@ -410,6 +411,7 @@ const props = withDefaults(
 const route = useRoute();
 const router = useRouter();
 const preferencesStore = usePreferencesStore();
+const booksCacheStore = useBooksCacheStore();
 const chapters = ref<BookChapter[]>([]);
 const bookTitle = ref("");
 const progress = ref<ReadingProgress | null>(null);
@@ -1121,16 +1123,36 @@ async function loadReader() {
   clearScheduledProgressSync();
 
   try {
+    // 优先从缓存读取章节列表，避免网络慢时重复等待
+    const cachedChapters = booksCacheStore.getChapters(props.bookId);
+    const cachedBookDetail = booksCacheStore.getBookDetail(props.bookId);
+
+    const bookDetailPromise = loadBookDetailSafely(props.bookId);
+    const progressPromise = loadProgressSafely(props.bookId);
+    const chaptersPromise = cachedChapters
+      ? Promise.resolve(cachedChapters)
+      : booksApi.chapters(props.bookId);
+
     const [bookDetail, chapterList, latestProgress] = await Promise.all([
-      loadBookDetailSafely(props.bookId),
-      booksApi.chapters(props.bookId),
-      loadProgressSafely(props.bookId),
+      bookDetailPromise,
+      chaptersPromise,
+      progressPromise,
     ]);
 
-    bookTitle.value = bookDetail?.title || "";
+    bookTitle.value = bookDetail?.title || cachedBookDetail?.title || "";
     chapters.value = chapterList;
     progress.value = latestProgress;
     lastSavedProgressKey = latestProgress ? getProgressKey(latestProgress) : "";
+
+    // 如果使用了缓存，后台静默刷新最新数据
+    if (cachedChapters) {
+      void booksApi.chapters(props.bookId).then((fresh) => {
+        chapters.value = fresh;
+        booksCacheStore.set(props.bookId, { chapters: fresh });
+      }).catch(() => {
+        // 静默失败，保持缓存数据
+      });
+    }
 
     if (chapterList.length === 0) {
       currentChapter.value = null;

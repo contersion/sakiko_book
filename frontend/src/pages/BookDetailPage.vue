@@ -301,12 +301,14 @@ import ChapterCatalogModalDrawer from "../components/ChapterCatalogModalDrawer.v
 import PageStatusPanel from "../components/PageStatusPanel.vue";
 import type { BookChapter, BookDetail, ChapterRule, ReadingProgress } from "../types/api";
 import { formatDateTime, formatNumber, formatPercent, formatWordCount } from "../utils/format";
+import { useBooksCacheStore } from "../stores/booksCache";
 
 const props = defineProps<{
   bookId: number;
 }>();
 
 const router = useRouter();
+const booksCacheStore = useBooksCacheStore();
 
 const BOOK_METADATA_UPDATED_EVENT = "books:metadata-updated";
 const book = ref<BookDetail | null>(null);
@@ -400,6 +402,11 @@ async function loadBookAndChapters() {
   chapters.value = chapterList;
   selectedRuleId.value = bookDetail.chapter_rule_id;
   syncEditorFields(bookDetail);
+
+  booksCacheStore.set(props.bookId, {
+    bookDetail,
+    chapters: chapterList,
+  });
 }
 
 async function loadRules() {
