@@ -11,23 +11,23 @@
         </div>
 
         <div class="bookshelf-page__header-actions">
-          <n-button quaternary size="medium" :loading="loading" @click="handleRefresh">刷新</n-button>
-          <n-button quaternary size="medium" :loading="groupMutationPending" @click="groupManagerVisible = true">
+          <Button variant="ghost" size="sm" :disabled="loading" @click="handleRefresh">刷新</Button>
+          <Button variant="ghost" size="sm" :disabled="groupMutationPending" @click="groupManagerVisible = true">
             分组管理
-          </n-button>
-          <n-button quaternary size="medium" @click="toggleEditMode">
+          </Button>
+          <Button variant="ghost" size="sm" @click="toggleEditMode">
             {{ isEditMode ? "完成" : "编辑" }}
-          </n-button>
-          <n-upload
-            ref="uploadRef"
-            class="bookshelf-page__upload"
+          </Button>
+          <input
+            ref="fileInputRef"
+            type="file"
             accept=".txt,text/plain"
-            :show-file-list="false"
-            :max="1"
-            :custom-request="handleUpload"
-          >
-            <n-button type="primary" secondary size="medium" :loading="uploading">上传 TXT</n-button>
-          </n-upload>
+            class="sr-only"
+            @change="handleFileUpload"
+          />
+          <Button variant="default" size="sm" :disabled="uploading" @click="fileInputRef?.click()">
+            上传 TXT
+          </Button>
         </div>
       </header>
 
@@ -50,54 +50,59 @@
           </div>
 
           <div class="bookshelf-page__filter-actions">
-            <n-select
-              v-model:value="sortKey"
-              size="medium"
-              class="bookshelf-page__sort"
-              :options="sortOptions"
-              :consistent-menu-width="false"
-            />
+            <Select v-model="sortKey">
+              <SelectTrigger class="bookshelf-page__sort">
+                <SelectValue placeholder="排序方式" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="option in sortOptions"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
 
             <div class="bookshelf-page__search">
-              <n-input
-                v-model:value="searchKeyword"
-                clearable
-                size="medium"
+              <Input
+                v-model="searchKeyword"
                 placeholder="搜索书名"
                 @keydown.enter.prevent="handleSearch"
-                @clear="handleClearSearch"
               />
-              <n-button secondary size="medium" :loading="loading" @click="handleSearch">搜索</n-button>
+              <Button variant="secondary" size="sm" :disabled="loading" @click="handleSearch">搜索</Button>
             </div>
           </div>
         </div>
       </section>
     </section>
 
-    <n-alert v-if="errorMessage" type="error" :show-icon="false" class="bookshelf-page__alert">
+    <Alert v-if="errorMessage" variant="destructive" class="bookshelf-page__alert">
       {{ errorMessage }}
-    </n-alert>
+    </Alert>
 
-    <n-alert v-if="groupWarningMessage" type="warning" :show-icon="false" class="bookshelf-page__alert">
+    <Alert v-if="groupWarningMessage" variant="warning" class="bookshelf-page__alert">
       {{ groupWarningMessage }}
-    </n-alert>
+    </Alert>
 
     <section v-if="loading" class="bookshelf-list bookshelf-list--loading" aria-label="加载中的书架">
       <article v-for="index in 6" :key="index" class="bookshelf-item bookshelf-item--loading">
         <div class="bookshelf-item__cover bookshelf-item__cover--loading"></div>
         <div class="bookshelf-item__body">
-          <n-skeleton text :repeat="3" />
-          <n-skeleton style="margin-top: 8px;" text :repeat="2" />
-          <n-skeleton style="margin-top: 8px;" text :repeat="2" />
+          <div class="flex flex-col gap-2">
+            <Skeleton v-for="i in 3" :key="i" class="h-4 w-full" />
+            <Skeleton v-for="i in 2" :key="`a-${i}`" class="h-4 w-3/4" />
+            <Skeleton v-for="i in 2" :key="`b-${i}`" class="h-4 w-1/2" />
+          </div>
         </div>
       </article>
     </section>
 
-    <n-empty v-else-if="displayedBooks.length === 0" :description="emptyDescription" class="bookshelf-page__empty">
-      <template #extra>
-        <span class="bookshelf-page__empty-tip">上传一本 TXT 后，书架会自动刷新。</span>
-      </template>
-    </n-empty>
+    <div v-else-if="displayedBooks.length === 0" class="bookshelf-page__empty flex flex-col items-center justify-center py-16 text-gray-500">
+      <p class="text-lg font-medium mb-2">{{ emptyDescription }}</p>
+      <span class="bookshelf-page__empty-tip text-sm">上传一本 TXT 后，书架会自动刷新。</span>
+    </div>
 
     <section v-else class="bookshelf-list" aria-label="书籍列表">
       <article
@@ -142,16 +147,13 @@
           </div>
 
           <div class="bookshelf-item__groups">
-            <n-tag
+            <Badge
               v-for="group in book.groups"
               :key="`${book.id}-${group.id}`"
-              size="small"
-              round
-              :bordered="false"
-              type="warning"
+              variant="secondary"
             >
               {{ group.name }}
-            </n-tag>
+            </Badge>
           </div>
 
           <div class="bookshelf-item__footer">
@@ -160,47 +162,40 @@
                 <span>阅读进度</span>
                 <strong>{{ formatProgress(book.progress_percent) }}</strong>
               </div>
-                          <n-progress
-                type="line"
-                :percentage="normalizeProgress(book.progress_percent)"
-                :show-indicator="false"
-                :height="6"
-                rail-color="rgba(244, 164, 180, 0.18)"
-                color="var(--primary-color)"
-              />
+                          <div class="bookshelf-progress">
+                            <div
+                              class="bookshelf-progress__fill"
+                              :style="{ width: normalizeProgress(book.progress_percent) + '%' }"
+                            ></div>
+                          </div>
             </div>
 
             <div class="bookshelf-item__actions">
-              <n-button
-                text
-                type="primary"
+              <Button
+                variant="link"
+                size="sm"
                 class="bookshelf-item__action bookshelf-item__action--primary"
-                :loading="continuingBookId === book.id"
+                :disabled="continuingBookId === book.id"
                 @click.stop="handleContinue(book)"
               >
                 {{ continueLabel(book) }}
-              </n-button>
-              <n-button quaternary size="small" class="bookshelf-item__action" @click.stop="goToDetail(book.id)">
+              </Button>
+              <Button variant="ghost" size="sm" class="bookshelf-item__action" @click.stop="goToDetail(book.id)">
                 详情
-              </n-button>
-              <n-button quaternary size="small" class="bookshelf-item__action" @click.stop="openBookGroupSelector(book)">
+              </Button>
+              <Button variant="ghost" size="sm" class="bookshelf-item__action" @click.stop="openBookGroupSelector(book)">
                 管理分组
-              </n-button>
-              <n-popconfirm v-if="isEditMode" @positive-click="() => handleDelete(book)">
-                <template #trigger>
-                  <n-button
-                    quaternary
-                    size="small"
-                    type="error"
-                    class="bookshelf-item__action"
-                    :loading="deletingBookId === book.id"
-                    @click.stop
-                  >
-                    删除
-                  </n-button>
-                </template>
-                删除后将同时移除本地书籍文件，确认继续吗？
-              </n-popconfirm>
+              </Button>
+              <Button
+                v-if="isEditMode"
+                variant="ghost"
+                size="sm"
+                class="bookshelf-item__action text-red-600 hover:text-red-700 hover:bg-red-50"
+                :disabled="deletingBookId === book.id"
+                @click.stop="confirmDelete(book)"
+              >
+                删除
+              </Button>
             </div>
           </div>
         </div>
@@ -229,21 +224,21 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { notify } from "@/utils/notify";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  NAlert,
-  NButton,
-  NEmpty,
-  NInput,
-  NPopconfirm,
-  NProgress,
-  NSelect,
-  NSkeleton,
-  NTag,
-  NUpload,
-  useMessage,
-  type UploadCustomRequestOptions,
-  type UploadInst,
-} from "naive-ui";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "vue-router";
 
 import { bookGroupsApi } from "../api/book-groups";
@@ -256,10 +251,9 @@ import { usePreferencesStore } from "../stores/preferences";
 import { clampPercentage, formatDateTime, formatNumber, formatPercent, formatWordCount } from "../utils/format";
 
 const router = useRouter();
-const message = useMessage();
+
 const preferencesStore = usePreferencesStore();
 const BOOK_METADATA_UPDATED_EVENT = "books:metadata-updated";
-const uploadRef = ref<UploadInst | null>(null);
 const books = ref<BookShelfItem[]>([]);
 const groups = ref<BookGroup[]>([]);
 const searchKeyword = ref(preferencesStore.bookshelf.search);
@@ -385,8 +379,12 @@ function resolveCover(coverUrl: string | null) {
   return resolveApiAssetUrl(coverUrl);
 }
 
+const fileInputRef = ref<HTMLInputElement | null>(null);
+
 function resetUploadControl() {
-  uploadRef.value?.clear();
+  if (fileInputRef.value) {
+    fileInputRef.value.value = "";
+  }
 }
 
 async function loadBooks(search = appliedSearch.value.trim()) {
@@ -433,16 +431,6 @@ function handleSearch() {
   void loadBooks(normalizedSearch);
 }
 
-function handleClearSearch() {
-  searchKeyword.value = "";
-  appliedSearch.value = "";
-  preferencesStore.patchBookshelf({
-    search: "",
-    page: 1,
-  });
-  void loadBooks("");
-}
-
 function handleRefresh() {
   void loadPage();
 }
@@ -479,9 +467,15 @@ async function handleContinue(book: BookShelfItem) {
       return;
     }
 
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     continuingBookId.value = null;
+  }
+}
+
+function confirmDelete(book: BookShelfItem) {
+  if (confirm(`删除后将同时移除本地书籍文件，确认删除「${book.title}」吗？`)) {
+    void handleDelete(book);
   }
 }
 
@@ -490,23 +484,22 @@ async function handleDelete(book: BookShelfItem) {
 
   try {
     await booksApi.delete(book.id);
-    message.success(`已删除《${book.title}》`);
+    notify.success(`已删除《${book.title}》`);
     await Promise.all([loadBooks(appliedSearch.value), loadGroups()]);
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     deletingBookId.value = null;
   }
 }
 
-async function handleUpload(options: UploadCustomRequestOptions) {
-  const file = options.file.file;
+async function handleFileUpload(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
 
   if (!(file instanceof File)) {
-    const error = new Error("未找到可上传的文件内容");
-    options.onError?.();
+    notify.error("未找到可上传的文件内容");
     resetUploadControl();
-    message.error(error.message);
     return;
   }
 
@@ -514,12 +507,10 @@ async function handleUpload(options: UploadCustomRequestOptions) {
 
   try {
     await booksApi.upload(file);
-    options.onFinish?.();
-    message.success(`《${file.name}》上传成功`);
+    notify.success(`《${file.name}》上传成功`);
     await loadPage();
   } catch (error) {
-    options.onError?.();
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     uploading.value = false;
     resetUploadControl();
@@ -531,10 +522,10 @@ async function handleCreateGroup(name: string) {
 
   try {
     await bookGroupsApi.create({ name });
-    message.success("分组已创建");
+    notify.success("分组已创建");
     await loadGroups();
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     groupMutationPending.value = false;
   }
@@ -545,10 +536,10 @@ async function handleRenameGroup(payload: { groupId: number; name: string }) {
 
   try {
     await bookGroupsApi.update(payload.groupId, { name: payload.name });
-    message.success("分组已重命名");
+    notify.success("分组已重命名");
     await Promise.all([loadGroups(), loadBooks(appliedSearch.value)]);
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     groupMutationPending.value = false;
   }
@@ -559,10 +550,10 @@ async function handleDeleteGroup(groupId: number) {
 
   try {
     await bookGroupsApi.remove(groupId);
-    message.success("分组已删除");
+    notify.success("分组已删除");
     await Promise.all([loadGroups(), loadBooks(appliedSearch.value)]);
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     groupMutationPending.value = false;
   }
@@ -577,7 +568,7 @@ async function openBookGroupSelector(book: BookShelfItem) {
     const currentGroups = await booksApi.getGroups(book.id);
     selectedGroupIds.value = currentGroups.map((group) => group.id);
   } catch (error) {
-    message.warning(`未能刷新《${book.title}》的最新分组，先使用当前页面数据。${getErrorMessage(error)}`);
+    notify.info(`未能刷新《${book.title}》的最新分组，先使用当前页面数据。${getErrorMessage(error)}`);
   }
 }
 
@@ -590,11 +581,11 @@ async function handleSubmitBookGroups(groupIds: number[]) {
 
   try {
     await booksApi.updateGroups(managingBook.value.id, { group_ids: groupIds });
-    message.success(`已更新《${managingBook.value.title}》的分组`);
+    notify.success(`已更新《${managingBook.value.title}》的分组`);
     groupSelectorVisible.value = false;
     await Promise.all([loadBooks(appliedSearch.value), loadGroups()]);
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     bookGroupsSubmitting.value = false;
   }
@@ -699,7 +690,7 @@ onUnmounted(() => {
   display: none;
 }
 
-.bookshelf-page__header-actions :deep(.n-button) {
+.bookshelf-page__header-actions button {
   border-radius: var(--radius-md);
   flex: 0 0 auto;
   white-space: nowrap;
@@ -708,11 +699,6 @@ onUnmounted(() => {
 .bookshelf-page__upload {
   flex: 0 0 auto;
   width: auto;
-}
-
-.bookshelf-page__upload :deep(.n-button) {
-  width: auto;
-  white-space: nowrap;
 }
 
 .bookshelf-page__controls {
@@ -813,24 +799,24 @@ onUnmounted(() => {
   align-items: end;
 }
 
-.bookshelf-page__search :deep(.n-input) {
+.bookshelf-page__search input {
   min-width: 0;
 }
 
-.bookshelf-page__header-actions :deep(.n-button),
-.bookshelf-page__filter-actions :deep(.n-button),
-.bookshelf-page__filter-actions :deep(.n-base-selection),
-.bookshelf-page__filter-actions :deep(.n-input-wrapper) {
+.bookshelf-page__header-actions button,
+.bookshelf-page__filter-actions button,
+.bookshelf-page__filter-actions [data-radix-popper-content-wrapper],
+.bookshelf-page__filter-actions input {
   border-radius: var(--radius-md);
 }
 
-.bookshelf-page__filter-actions :deep(.n-base-selection),
-.bookshelf-page__filter-actions :deep(.n-input-wrapper) {
+.bookshelf-page__filter-actions [data-radix-popper-content-wrapper],
+.bookshelf-page__filter-actions input {
   border-color: var(--border-color-soft);
   background: rgba(255, 255, 255, 0.72);
 }
 
-.bookshelf-page__search :deep(.n-button) {
+.bookshelf-page__search button {
   min-width: 88px;
   white-space: nowrap;
 }
@@ -1172,8 +1158,21 @@ onUnmounted(() => {
     grid-template-columns: 1fr;
   }
 
-  .bookshelf-page__search :deep(.n-button) {
-    width: 100%;
-  }
 }
+
+.bookshelf-progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(244, 164, 180, 0.18);
+  overflow: hidden;
+}
+
+.bookshelf-progress__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary-color);
+  transition: width 300ms ease;
+}
+
 </style>

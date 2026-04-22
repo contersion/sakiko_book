@@ -1,5 +1,4 @@
 <template>
-  <n-config-provider abstract :theme="naiveTheme">
     <div
       class="reader-page"
       :class="[
@@ -10,20 +9,26 @@
     >
     <div v-if="loading" class="reader-loading">
       <section class="reader-glass reader-loading__panel reader-loading__panel--rail">
-        <n-skeleton text :repeat="3" />
-        <n-skeleton style="margin-top: 18px;" text :repeat="4" />
+        <div class="space-y-2">
+          <Skeleton v-for="i in 7" :key="i" class="h-4 w-full" />
+        </div>
       </section>
       <section class="reader-loading__main">
         <section class="reader-glass reader-loading__panel">
-          <n-skeleton text :repeat="3" />
-          <n-skeleton style="margin-top: 14px;" text :repeat="2" />
+          <div class="space-y-2">
+            <Skeleton v-for="i in 5" :key="i" class="h-4 w-full" />
+          </div>
         </section>
         <section class="reader-paper reader-loading__paper">
-          <n-skeleton text :repeat="14" />
+          <div class="space-y-2">
+            <Skeleton v-for="i in 14" :key="i" class="h-4 w-full" />
+          </div>
         </section>
       </section>
       <section class="reader-glass reader-loading__panel reader-loading__panel--float">
-        <n-skeleton text :repeat="4" />
+        <div class="space-y-2">
+          <Skeleton v-for="i in 4" :key="i" class="h-4 w-full" />
+        </div>
       </section>
     </div>
 
@@ -34,8 +39,8 @@
       :description="pageError"
     >
       <template #action>
-        <n-button type="primary" @click="loadReader">重新加载</n-button>
-        <n-button tertiary @click="goBack">返回详情</n-button>
+        <Button @click="loadReader">重新加载</Button>
+        <Button variant="ghost" @click="goBack">返回详情</Button>
       </template>
     </page-status-panel>
 
@@ -45,8 +50,8 @@
       description="可以先回到书籍详情页重新解析目录，或稍后再刷新一次。"
     >
       <template #action>
-        <n-button secondary @click="loadReader">重新加载</n-button>
-        <n-button tertiary @click="goBack">返回详情</n-button>
+        <Button variant="outline" @click="loadReader">重新加载</Button>
+        <Button variant="ghost" @click="goBack">返回详情</Button>
       </template>
     </page-status-panel>
 
@@ -97,17 +102,14 @@
         </section>
 
         <section class="reader-paper">
-          <n-alert
-            v-if="chapterError"
-            type="error"
-            :show-icon="false"
-            class="reader-page__alert"
-          >
+          <Alert v-if="chapterError" variant="destructive" class="reader-page__alert">
             {{ chapterError }}
-          </n-alert>
+          </Alert>
 
           <div v-if="!currentChapter && chapterLoading" class="reader-content reader-content--loading">
-            <n-skeleton text :repeat="10" />
+            <div class="space-y-2">
+              <Skeleton v-for="i in 10" :key="i" class="h-4 w-full" />
+            </div>
           </div>
 
           <article
@@ -141,23 +143,23 @@
           </article>
           <section v-if="isCompactViewport" class="reader-paper__chapter-nav" @click.stop>
             <div class="reader-paper__chapter-actions">
-              <n-button
-                block
-                size="large"
+              <Button
+                class="w-full"
+                size="lg"
+                variant="outline"
                 :disabled="!canGoPrev || chapterLoading"
                 @click="handlePrevChapter"
               >
                 上一章
-              </n-button>
-              <n-button
-                block
-                type="primary"
-                size="large"
+              </Button>
+              <Button
+                class="w-full"
+                size="lg"
                 :disabled="!canGoNext || chapterLoading"
                 @click="handleNextChapter"
               >
                 下一章
-              </n-button>
+              </Button>
             </div>
           </section>
         </section>
@@ -170,13 +172,12 @@
             <strong>{{ progressPercentLabel }}</strong>
           </div>
 
-          <n-progress
-            type="line"
-            :percentage="currentProgressPercent"
-            :show-indicator="false"
-            color="var(--reader-accent)"
-            rail-color="var(--reader-progress-rail)"
-          />
+          <div class="reader-progress-bar">
+            <div
+              class="reader-progress-bar__fill"
+              :style="{ width: currentProgressPercent + '%' }"
+            ></div>
+          </div>
 
           <div class="reader-float__summary">
             <span>{{ currentChapterPositionLabel }}</span>
@@ -185,21 +186,29 @@
           </div>
 
           <div class="reader-float__actions">
-            <n-button secondary :disabled="!canGoPrev || chapterLoading" @click="handlePrevChapter">
+            <Button variant="outline" :disabled="!canGoPrev || chapterLoading" @click="handlePrevChapter">
               上一章
-            </n-button>
-            <n-button type="primary" :disabled="!canGoNext || chapterLoading" @click="handleNextChapter">
+            </Button>
+            <Button :disabled="!canGoNext || chapterLoading" @click="handleNextChapter">
               下一章
-            </n-button>
+            </Button>
           </div>
         </div>
       </aside>
     </div>
 
-    <n-drawer v-model:show="isDrawerOpen" placement="left" :width="drawerWidth">
-      <n-drawer-content :title="drawerTitle" closable body-content-style="padding: 20px;">
+    <transition name="reader-drawer">
+      <div v-if="isDrawerOpen" class="reader-drawer">
+        <div class="reader-drawer__backdrop" @click="activeDrawer = null"></div>
+        <div class="reader-drawer__panel" :style="{ width: drawerWidth + 'px' }">
         <template v-if="activeDrawer === 'catalog'">
           <div class="reader-drawer__surface" :class="readerThemeClass">
+            <div class="reader-drawer__header">
+              <span class="reader-drawer__title">{{ drawerTitle }}</span>
+              <button type="button" class="reader-drawer__close" @click="activeDrawer = null">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
             <div class="reader-drawer__summary">
             <div>
               <span>{{ currentChapterPositionLabel }}</span>
@@ -208,14 +217,12 @@
             <p>{{ syncedProgressLabel }}</p>
           </div>
 
-          <n-progress
-            type="line"
-            :percentage="currentProgressPercent"
-            :show-indicator="false"
-            color="var(--reader-accent)"
-            rail-color="var(--reader-progress-rail)"
-            class="reader-drawer__progress"
-          />
+          <div class="reader-progress-bar reader-drawer__progress">
+            <div
+              class="reader-progress-bar__fill"
+              :style="{ width: currentProgressPercent + '%' }"
+            ></div>
+          </div>
 
             <div ref="catalogListRef" class="reader-catalog__list reader-catalog__list--drawer">
             <button
@@ -238,13 +245,19 @@
 
         <template v-else>
           <div class="reader-drawer__surface" :class="readerThemeClass">
+            <div class="reader-drawer__header">
+              <span class="reader-drawer__title">{{ drawerTitle }}</span>
+              <button type="button" class="reader-drawer__close" @click="activeDrawer = null">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
             <div class="reader-settings">
             <section class="reader-settings__group">
               <div class="reader-settings__label-row">
                 <span>字体大小</span>
                 <strong>{{ preferences.fontSize }}px</strong>
               </div>
-              <n-slider v-model:value="preferences.fontSize" :step="1" :min="15" :max="28" />
+              <Slider v-model="preferences.fontSize" :min="15" :max="28" :step="1" />
             </section>
 
             <section class="reader-settings__group">
@@ -252,7 +265,7 @@
                 <span>行高</span>
                 <strong>{{ preferences.lineHeight.toFixed(2) }}</strong>
               </div>
-              <n-slider v-model:value="preferences.lineHeight" :step="0.05" :min="1.45" :max="2.5" />
+              <Slider v-model="preferences.lineHeight" :min="1.45" :max="2.5" :step="0.05" />
             </section>
 
             <section class="reader-settings__group">
@@ -261,12 +274,22 @@
                 <strong>{{ preferences.theme === 'dark' ? '深色' : '浅色' }}</strong>
               </div>
               <div class="reader-settings__theme-mode">{{ readerThemeLabel }}</div>
-              <n-radio-group v-model:value="preferences.theme" name="reader-theme">
-                <n-space>
-                  <n-radio-button value="light">浅色</n-radio-button>
-                  <n-radio-button value="dark">深色</n-radio-button>
-                </n-space>
-              </n-radio-group>
+              <div class="flex flex-wrap gap-2">
+                <label
+                  class="reader-radio"
+                  :class="{ 'reader-radio--active': preferences.theme === 'light' }"
+                >
+                  <input v-model="preferences.theme" type="radio" value="light" class="sr-only" />
+                  <span>浅色</span>
+                </label>
+                <label
+                  class="reader-radio"
+                  :class="{ 'reader-radio--active': preferences.theme === 'dark' }"
+                >
+                  <input v-model="preferences.theme" type="radio" value="dark" class="sr-only" />
+                  <span>深色</span>
+                </label>
+              </div>
             </section>
 
             <section class="reader-settings__group">
@@ -274,7 +297,7 @@
                 <span>字间距</span>
                 <strong>{{ preferences.letterSpacing.toFixed(2) }}px</strong>
               </div>
-              <n-slider v-model:value="preferences.letterSpacing" :step="0.05" :min="0" :max="2" />
+              <Slider v-model="preferences.letterSpacing" :min="0" :max="2" :step="0.05" />
             </section>
 
             <section class="reader-settings__group">
@@ -282,7 +305,7 @@
                 <span>段间距</span>
                 <strong>{{ preferences.paragraphSpacing.toFixed(2) }}x</strong>
               </div>
-              <n-slider v-model:value="preferences.paragraphSpacing" :step="0.05" :min="0" :max="2.5" />
+              <Slider v-model="preferences.paragraphSpacing" :min="0" :max="2.5" :step="0.05" />
             </section>
 
             <section class="reader-settings__group">
@@ -290,33 +313,23 @@
                 <span>阅读宽度</span>
                 <strong>{{ preferences.contentWidth }}ch</strong>
               </div>
-              <n-slider v-model:value="preferences.contentWidth" :step="1" :min="56" :max="96" />
+              <Slider v-model="preferences.contentWidth" :min="56" :max="96" :step="1" />
             </section>
             </div>
           </div>
         </template>
-      </n-drawer-content>
-    </n-drawer>
+        </div>
+      </div>
+    </transition>
     </div>
-  </n-config-provider>
 </template>
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import type { ComponentPublicInstance } from "vue";
-import {
-  NAlert,
-  NButton,
-  NConfigProvider,
-  NDrawer,
-  NDrawerContent,
-  NProgress,
-  NRadioButton,
-  NRadioGroup,
-  NSkeleton,
-  NSlider,
-  NSpace,
-  darkTheme,
-} from "naive-ui";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Slider } from "@/components/ui/slider";
 import { useRoute, useRouter } from "vue-router";
 
 import { booksApi } from "../api/books";
@@ -414,7 +427,6 @@ const shouldShowChrome = computed(() => !isCompactViewport.value || mobileChrome
 const progressPercentLabel = computed(() => formatPercent(currentProgressPercent.value));
 const readerThemeClass = computed(() => `reader-page--${preferences.theme}`);
 const readerThemeLabel = computed(() => (preferences.theme === "dark" ? "黑夜模式" : "白天模式"));
-const naiveTheme = computed(() => (preferences.theme === "dark" ? darkTheme : null));
 const drawerTitle = computed(() => (activeDrawer.value === "settings" ? "阅读设置" : "章节目录"));
 const drawerWidth = computed(() => Math.min(Math.max(viewportWidth.value - 24, 280), 380));
 const isDrawerOpen = computed({
@@ -1757,6 +1769,40 @@ function goBack() {
 
 .reader-drawer__surface {
   color: var(--reader-body);
+  background: var(--reader-panel-bg);
+  padding: 20px;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.reader-drawer__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.reader-drawer__title {
+  color: var(--reader-heading);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.reader-drawer__close {
+  display: inline-flex;
+  padding: 4px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--reader-muted);
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.reader-drawer__close:hover {
+  background: var(--reader-action-bg);
+  color: var(--reader-heading);
 }
 
 .reader-drawer__progress {
@@ -1780,9 +1826,9 @@ function goBack() {
   display: grid;
   gap: 6px;
   padding: 14px 16px;
-  border: 1px solid transparent;
+  border: 1px solid var(--reader-panel-border);
   border-radius: 18px;
-  background: var(--reader-action-bg);
+  background: transparent;
   color: inherit;
   text-align: left;
   cursor: pointer;
@@ -1795,11 +1841,12 @@ function goBack() {
 .reader-catalog__item:hover {
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--reader-accent) 24%, transparent);
+  background: color-mix(in srgb, var(--reader-accent) 8%, transparent);
 }
 
 .reader-catalog__item--active {
   border-color: color-mix(in srgb, var(--reader-accent) 28%, transparent);
-  background: color-mix(in srgb, var(--reader-accent) 12%, var(--reader-action-bg));
+  background: color-mix(in srgb, var(--reader-accent) 12%, transparent);
 }
 
 .reader-catalog__index {
@@ -1821,9 +1868,9 @@ function goBack() {
   display: grid;
   gap: 14px;
   padding: 18px;
-  border: 1px solid var(--reader-settings-border);
+  border: 1px solid var(--reader-panel-border);
   border-radius: 22px;
-  background: var(--reader-settings-bg);
+  background: transparent;
 }
 
 .reader-settings__label-row {
@@ -1960,4 +2007,90 @@ function goBack() {
     gap: 8px;
   }
 }
+
+.reader-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.reader-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.reader-drawer__panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--reader-panel-bg);
+}
+
+.reader-drawer-enter-active,
+.reader-drawer-leave-active {
+  transition: opacity 280ms ease;
+}
+
+.reader-drawer-enter-from,
+.reader-drawer-leave-to {
+  opacity: 0;
+}
+
+.reader-drawer-enter-active .reader-drawer__panel,
+.reader-drawer-leave-active .reader-drawer__panel {
+  transition: transform 280ms ease;
+}
+
+.reader-drawer-enter-from .reader-drawer__panel,
+.reader-drawer-leave-to .reader-drawer__panel {
+  transform: translateX(-100%);
+}
+
+.reader-progress-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--reader-progress-rail);
+  overflow: hidden;
+}
+
+.reader-progress-bar__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--reader-accent);
+  transition: width 300ms ease;
+}
+
+.reader-radio {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border: 1px solid var(--reader-panel-border);
+  border-radius: 14px;
+  background: var(--reader-action-bg);
+  color: var(--reader-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.reader-radio:hover {
+  background: var(--reader-action-hover);
+}
+
+.reader-radio--active {
+  border-color: color-mix(in srgb, var(--reader-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--reader-accent) 14%, transparent);
+  color: var(--reader-accent);
+  font-weight: 600;
+}
+
+.reader-radio input {
+  position: absolute;
+  opacity: 0;
+}
+
 </style>

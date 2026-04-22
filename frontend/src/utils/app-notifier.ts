@@ -1,8 +1,6 @@
-﻿import { createDiscreteApi } from "naive-ui";
+﻿import { notify } from "./notify";
 
 import { ApiError, getErrorMessage } from "../api/client";
-
-const { message } = createDiscreteApi(["message"]);
 
 let handlersInstalled = false;
 let lastShownMessage = "";
@@ -41,7 +39,7 @@ export function notifyGlobalError(error: unknown, fallback?: string) {
     return;
   }
 
-  message.error(messageText, {
+  notify.error(messageText, {
     duration: 4000,
   });
 }

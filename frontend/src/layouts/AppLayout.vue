@@ -1,6 +1,9 @@
 <template>
-  <n-layout class="app-layout" :class="{ 'app-layout--immersive': isImmersiveRoute }">
-    <n-layout-header v-if="!isImmersiveRoute" bordered class="app-layout__header">
+  <div class="app-layout" :class="{ 'app-layout--immersive': isImmersiveRoute }">
+    <header
+      v-if="!isImmersiveRoute"
+      class="app-layout__header"
+    >
       <div class="app-layout__brand">
         <div class="app-layout__badge">TXT</div>
         <div>
@@ -10,52 +13,52 @@
       </div>
 
       <div class="app-layout__actions">
-        <n-space size="small" wrap class="app-layout__nav-actions">
-          <n-button
-            :type="route.name === 'books' ? 'primary' : 'default'"
-            secondary
+        <div class="app-layout__nav-actions">
+          <Button
+            :variant="route.name === 'books' ? 'default' : 'secondary'"
+            size="sm"
             @click="goTo('books')"
           >
             书架
-          </n-button>
-          <n-button
-            :type="route.name === 'rules' ? 'primary' : 'default'"
-            secondary
+          </Button>
+          <Button
+            :variant="route.name === 'rules' ? 'default' : 'secondary'"
+            size="sm"
             @click="goTo('rules')"
           >
             目录规则
-          </n-button>
-          <n-button secondary @click="backendModalVisible = true">
+          </Button>
+          <Button variant="secondary" size="sm" @click="backendModalVisible = true">
             切换后端
-          </n-button>
-          <n-button secondary @click="handleToggleTheme">
+          </Button>
+          <Button variant="secondary" size="sm" @click="handleToggleTheme">
             {{ themeToggleLabel }}
-          </n-button>
-        </n-space>
+          </Button>
+        </div>
 
         <div class="app-layout__user">
           <div class="app-layout__user-meta">
             <span class="app-layout__username">{{ authStore.user?.username }}</span>
             <span class="app-layout__backend">{{ backendSummary }}</span>
           </div>
-          <n-button tertiary @click="handleLogout">退出登录</n-button>
+          <Button variant="ghost" size="sm" @click="handleLogout">退出登录</Button>
         </div>
       </div>
-    </n-layout-header>
+    </header>
 
-    <n-layout-content class="app-layout__content" :class="{ 'app-layout__content--immersive': isImmersiveRoute }">
+    <main class="app-layout__content" :class="{ 'app-layout__content--immersive': isImmersiveRoute }">
       <router-view />
-    </n-layout-content>
+    </main>
 
     <backend-switch-modal v-model:show="backendModalVisible" />
-  </n-layout>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { NButton, NLayout, NLayoutContent, NLayoutHeader, NSpace } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 
+import { Button } from "@/components/ui/button";
 import BackendSwitchModal from "../components/BackendSwitchModal.vue";
 import { useAuthStore } from "../stores/auth";
 import { useAppThemeStore } from "../stores/app-theme";
@@ -85,7 +88,6 @@ function handleToggleTheme() {
   const nextTheme = appThemeStore.theme === "dark" ? "light" : "dark";
   appThemeStore.setTheme(nextTheme, true);
 
-  // 阅读页继续复用既有 reader.theme，这里顺带同步，避免进入阅读页后主题不一致。
   if (preferencesStore.initialized) {
     preferencesStore.patchReader({ theme: nextTheme }, 0);
     return;
@@ -138,7 +140,6 @@ function handleToggleTheme() {
   letter-spacing: 0.08em;
   color: white;
   background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  /* 二次元风格徽章阴影：粉色调弥散阴影 */
   box-shadow: 0 12px 24px rgba(244, 164, 180, 0.28);
 }
 
@@ -159,6 +160,9 @@ function handleToggleTheme() {
 }
 
 .app-layout__nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
   max-width: 100%;
 }

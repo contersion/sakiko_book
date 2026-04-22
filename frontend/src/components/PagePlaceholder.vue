@@ -1,28 +1,28 @@
-﻿<template>
-  <n-card class="page-placeholder" :bordered="false">
-    <n-space vertical :size="18">
+<template>
+  <div class="page-placeholder">
+    <div class="flex flex-col gap-4">
       <div v-if="eyebrow" class="page-placeholder__eyebrow">{{ eyebrow }}</div>
       <div class="page-placeholder__header">
         <h1 class="page-placeholder__title">{{ title }}</h1>
         <p class="page-placeholder__description">{{ description }}</p>
       </div>
 
-      <n-space v-if="tips.length" wrap size="small">
-        <n-tag v-for="tip in tips" :key="tip" round :bordered="false" type="success">
+      <div v-if="tips.length" class="flex flex-wrap gap-2">
+        <Badge v-for="tip in tips" :key="tip" variant="default">
           {{ tip }}
-        </n-tag>
-      </n-space>
+        </Badge>
+      </div>
 
       <div class="page-placeholder__content">
         <slot />
       </div>
-    </n-space>
-  </n-card>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { NCard, NSpace, NTag } from "naive-ui";
+import { Badge } from "@/components/ui/badge";
 
 const props = withDefaults(
   defineProps<{
@@ -45,6 +45,7 @@ const tips = computed(() => props.tips);
   border-radius: 28px;
   background: color-mix(in srgb, var(--surface-color) 94%, white 6%);
   box-shadow: var(--surface-shadow);
+  padding: 24px;
 }
 
 .page-placeholder__eyebrow {

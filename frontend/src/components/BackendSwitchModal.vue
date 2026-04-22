@@ -1,82 +1,86 @@
 <template>
-  <n-modal
-    :show="show"
-    preset="card"
-    :mask-closable="!submitting"
-    :closable="!submitting"
-    :style="modalStyle"
-    @update:show="handleModalVisibilityChange"
-  >
-    <template #header>
-      <span>切换后端</span>
-    </template>
+  <Dialog :open="show" @update:open="handleModalVisibilityChange">
+    <DialogContent class="max-w-lg">
+      <DialogHeader>
+        <DialogTitle>切换后端</DialogTitle>
+      </DialogHeader>
 
-    <div class="backend-switcher">
-      <n-alert type="info" :show-icon="false">
-        当前连接：<strong>{{ currentBackendSummary }}</strong>
-      </n-alert>
+      <div class="backend-switcher">
+        <Alert variant="info">
+          当前连接：<strong>{{ currentBackendSummary }}</strong>
+        </Alert>
 
-      <n-alert v-if="formError" type="error" :show-icon="false">
-        {{ formError }}
-      </n-alert>
+        <Alert v-if="formError" variant="destructive">
+          {{ formError }}
+        </Alert>
 
-      <n-form label-placement="top">
-        <n-form-item label="连接模式">
-          <n-radio-group v-model:value="draft.mode" name="backend-mode">
-            <n-space vertical size="small">
-              <n-radio value="local">本地后端</n-radio>
-              <n-radio value="remote">远程后端</n-radio>
-            </n-space>
-          </n-radio-group>
-          <div class="backend-switcher__hint">
-            本地模式会继续使用当前 Web 的同源 `/api` 行为，或使用本地环境变量里的覆盖地址。
+        <div class="backend-switcher__fields">
+          <div class="backend-switcher__field">
+            <label>连接模式</label>
+            <div class="backend-switcher__radio-group">
+              <label
+                class="backend-switcher__radio"
+                :class="{ 'backend-switcher__radio--active': draft.mode === 'local' }"
+              >
+                <input v-model="draft.mode" type="radio" value="local" class="sr-only" />
+                <span>本地后端</span>
+              </label>
+              <label
+                class="backend-switcher__radio"
+                :class="{ 'backend-switcher__radio--active': draft.mode === 'remote' }"
+              >
+                <input v-model="draft.mode" type="radio" value="remote" class="sr-only" />
+                <span>远程后端</span>
+              </label>
+            </div>
+            <div class="backend-switcher__hint">
+              本地模式会继续使用当前 Web 的同源 `/api` 行为，或使用本地环境变量里的覆盖地址。
+            </div>
           </div>
-        </n-form-item>
 
-        <n-form-item label="远程后端地址">
-          <n-input
-            v-model:value="draft.remoteBaseUrl"
-            :disabled="draft.mode !== 'remote' || submitting"
-            placeholder="https://example.com"
-          />
-          <div class="backend-switcher__hint">
-            这里只填写后端根地址，不要包含 `/api`。
+          <div class="backend-switcher__field">
+            <label>远程后端地址</label>
+            <Input
+              v-model="draft.remoteBaseUrl"
+              :disabled="draft.mode !== 'remote' || submitting"
+              placeholder="https://example.com"
+            />
+            <div class="backend-switcher__hint">
+              这里只填写后端根地址，不要包含 `/api`。
+            </div>
           </div>
-        </n-form-item>
-      </n-form>
-    </div>
-
-    <template #footer>
-      <div class="backend-switcher__footer">
-        <n-button :disabled="submitting" @click="applyLocalDefault">
-          恢复本地默认
-        </n-button>
-        <n-space>
-          <n-button :disabled="submitting" @click="closeModal">取消</n-button>
-          <n-button type="primary" :loading="submitting" @click="submit">
-            保存并重新登录
-          </n-button>
-        </n-space>
+        </div>
       </div>
-    </template>
-  </n-modal>
+
+      <div class="backend-switcher__footer">
+        <Button variant="ghost" :disabled="submitting" @click="applyLocalDefault">
+          恢复本地默认
+        </Button>
+        <div class="flex gap-2">
+          <Button variant="ghost" :disabled="submitting" @click="closeModal">取消</Button>
+          <Button :disabled="submitting" @click="submit">
+            保存并重新登录
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
-import {
-  NAlert,
-  NButton,
-  NForm,
-  NFormItem,
-  NInput,
-  NModal,
-  NRadio,
-  NRadioGroup,
-  NSpace,
-  useMessage,
-} from "naive-ui";
 import { useRouter } from "vue-router";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert } from "@/components/ui/alert";
+import { notify } from "@/utils/notify";
 
 import { useAuthStore } from "../stores/auth";
 import { usePreferencesStore } from "../stores/preferences";
@@ -107,12 +111,7 @@ const emit = defineEmits<{
   (event: "update:show", value: boolean): void;
 }>();
 
-const modalStyle = {
-  width: "min(560px, calc(100vw - 24px))",
-};
-
 const router = useRouter();
-const message = useMessage();
 const authStore = useAuthStore();
 const preferencesStore = usePreferencesStore();
 const submitting = ref(false);
@@ -191,7 +190,7 @@ async function submit() {
     const nextConfig = buildNextConfig();
 
     if (isSameBackendConfig(currentConfig.value, nextConfig)) {
-      message.info("当前已经在使用这个后端。");
+      notify.info("当前已经在使用这个后端。");
       closeModal();
       return;
     }
@@ -212,7 +211,7 @@ async function submit() {
   } catch (error) {
     const messageText = error instanceof Error ? error.message : "切换后端失败，请稍后重试。";
     formError.value = messageText;
-    message.error(messageText);
+    notify.error(messageText);
   } finally {
     submitting.value = false;
   }
@@ -223,6 +222,57 @@ async function submit() {
 .backend-switcher {
   display: grid;
   gap: 16px;
+}
+
+.backend-switcher__fields {
+  display: grid;
+  gap: 16px;
+}
+
+.backend-switcher__field {
+  display: grid;
+  gap: 8px;
+}
+
+.backend-switcher__field label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.backend-switcher__radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.backend-switcher__radio {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border: 1px solid var(--border-color-soft);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.backend-switcher__radio:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.backend-switcher__radio--active {
+  border-color: var(--primary-color);
+  background: rgba(244, 164, 180, 0.12);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.backend-switcher__radio input {
+  position: absolute;
+  opacity: 0;
 }
 
 .backend-switcher__hint {
@@ -237,6 +287,7 @@ async function submit() {
   justify-content: space-between;
   gap: 12px;
   align-items: center;
+  margin-top: 16px;
 }
 
 @media (max-width: 640px) {

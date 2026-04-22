@@ -1,7 +1,7 @@
-﻿<template>
+<template>
   <div class="login-page">
-    <n-grid cols="1 l:2" responsive="screen" :x-gap="24" :y-gap="24">
-      <n-grid-item>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div>
         <div class="login-page__intro">
           <div class="login-page__eyebrow">TXT Reader</div>
           <h1 class="login-page__title">继续你的阅读，而不是重新找回进度</h1>
@@ -9,17 +9,17 @@
             登录成功后会自动进入书架；如果你是从业务页被拦截回来的，系统会在认证成功后自动带你回到原来的页面。
           </p>
 
-          <n-space vertical :size="12">
-            <n-alert type="info" :show-icon="false">
+          <div class="flex flex-col gap-3">
+            <Alert variant="info">
               当前后端：<strong>{{ activeBackendSummary }}</strong>
-            </n-alert>
-            <n-alert type="warning" :show-icon="false">
+            </Alert>
+            <Alert variant="warning">
               默认账号取决于当前后端的初始化配置，请以目标后端的实际账号为准。
-            </n-alert>
-            <n-alert type="success" :show-icon="false">
+            </Alert>
+            <Alert variant="success">
               已启用登录态恢复与路由守卫，刷新后会自动尝试恢复会话。
-            </n-alert>
-          </n-space>
+            </Alert>
+          </div>
 
           <div class="login-page__feature-list" aria-label="登录后可用能力">
             <div class="login-page__feature-item">
@@ -36,11 +36,11 @@
             </div>
           </div>
         </div>
-      </n-grid-item>
+      </div>
 
-      <n-grid-item>
-        <n-card class="login-page__card" :bordered="false">
-          <n-space vertical :size="18">
+      <div>
+        <Card class="login-page__card">
+          <CardContent class="flex flex-col gap-4 pt-6">
             <div class="login-page__form-head">
               <div>
                 <h2 class="login-page__form-title">登录</h2>
@@ -49,64 +49,59 @@
                 </p>
               </div>
 
-              <n-button secondary size="small" @click="backendModalVisible = true">
+              <Button variant="outline" size="sm" @click="backendModalVisible = true">
                 切换后端
-              </n-button>
+              </Button>
             </div>
 
             <div class="login-page__backend-summary">
               当前连接：{{ activeBackendSummary }}
             </div>
 
-            <n-alert
-              v-if="authStore.errorMessage"
-              type="error"
-              :show-icon="false"
-              class="login-page__error"
-            >
+            <Alert v-if="authStore.errorMessage" variant="destructive">
               {{ authStore.errorMessage }}
-            </n-alert>
+            </Alert>
 
-            <n-form label-placement="top">
-              <n-form-item label="用户名">
-                <n-input
-                  v-model:value="form.username"
+            <form class="flex flex-col gap-4" @submit.prevent="handleLogin">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-medium">用户名</label>
+                <Input
+                  v-model="form.username"
                   placeholder="请输入用户名"
                   :disabled="authStore.loginPending"
-                  @update:value="clearError"
+                  @update:model-value="clearError"
                 />
-              </n-form-item>
+              </div>
 
-              <n-form-item label="密码">
-                <n-input
-                  v-model:value="form.password"
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-medium">密码</label>
+                <Input
+                  v-model="form.password"
                   type="password"
-                  show-password-on="click"
                   placeholder="请输入密码"
                   :disabled="authStore.loginPending"
-                  @update:value="clearError"
+                  @update:model-value="clearError"
                   @keydown.enter.prevent="handleLogin"
                 />
-              </n-form-item>
+              </div>
 
-              <n-button
-                type="primary"
-                size="large"
-                block
-                :loading="authStore.loginPending"
-                @click="handleLogin"
+              <Button
+                type="submit"
+                size="lg"
+                class="w-full"
+                :disabled="authStore.loginPending"
               >
                 登录并进入书架
-              </n-button>
-            </n-form>
+              </Button>
+            </form>
 
             <div class="login-page__footnote">
-              如果后端未启动，登录页会直接提示连接失败，方便你区分“服务没开”和“账号密码错误”。
+              如果后端未启动，登录页会直接提示连接失败，方便你区分"服务没开"和"账号密码错误"。
             </div>
-          </n-space>
-        </n-card>
-      </n-grid-item>
-    </n-grid>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
 
     <backend-switch-modal v-model:show="backendModalVisible" />
   </div>
@@ -114,26 +109,18 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue";
-import {
-  NAlert,
-  NButton,
-  NCard,
-  NForm,
-  NFormItem,
-  NGrid,
-  NGridItem,
-  NInput,
-  NSpace,
-  useMessage,
-} from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { notify } from "@/utils/notify";
 import BackendSwitchModal from "../components/BackendSwitchModal.vue";
 import { useAuthStore } from "../stores/auth";
 import { consumeBackendNotice, getBackendDisplaySummary } from "../utils/backend";
 
 const authStore = useAuthStore();
-const message = useMessage();
 const route = useRoute();
 const router = useRouter();
 const backendModalVisible = ref(false);
@@ -166,16 +153,16 @@ function showBackendNotice() {
   }
 
   if (notice.type === "error") {
-    message.error(notice.text);
+    notify.error(notice.text);
     return;
   }
 
   if (notice.type === "info") {
-    message.info(notice.text);
+    notify.info(notice.text);
     return;
   }
 
-  message.success(notice.text);
+  notify.success(notice.text);
 }
 
 async function handleLogin() {
@@ -192,7 +179,7 @@ async function handleLogin() {
       password: form.password,
     });
 
-    message.success("登录成功");
+    notify.success("登录成功");
 
     const redirect = typeof route.query.redirect === "string" ? route.query.redirect : "/books";
     await router.push(redirect);
@@ -224,7 +211,6 @@ onMounted(() => {
   display: grid;
   gap: 22px;
   padding: clamp(24px, 5vw, 40px);
-  /* 二次元风格介绍区：淡粉紫光晕 + 奶白底色 */
   background:
     radial-gradient(circle at top right, rgba(244, 164, 180, 0.22), transparent 34%),
     radial-gradient(circle at bottom left, rgba(201, 177, 255, 0.12), transparent 30%),

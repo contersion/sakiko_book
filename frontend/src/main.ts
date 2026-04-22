@@ -7,6 +7,7 @@ import { useAppThemeStore } from "./stores/app-theme";
 import { pinia } from "./stores";
 import { installGlobalErrorHandling, notifyGlobalError } from "./utils/app-notifier";
 import "./styles/index.css";
+import "./styles/tailwind.css";
 
 installGlobalErrorHandling();
 

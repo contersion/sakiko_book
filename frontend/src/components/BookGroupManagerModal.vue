@@ -1,86 +1,93 @@
-﻿<template>
-  <n-modal
-    :show="show"
-    preset="card"
-    :mask-closable="!busy"
-    :closable="!busy"
-    :style="{ width: 'min(760px, calc(100vw - 24px))' }"
-    @update:show="handleShowChange"
-  >
-    <template #header>
-      <span>分组管理</span>
-    </template>
+<template>
+  <Dialog :open="show" @update:open="handleShowChange">
+    <DialogContent class="max-w-2xl">
+      <DialogHeader>
+        <DialogTitle>分组管理</DialogTitle>
+      </DialogHeader>
 
-    <section class="group-manager__create">
-      <div>
-        <strong>创建新分组</strong>
-        <p>分组名不能为空，且同一用户下不能重复。</p>
+      <section class="group-manager__create">
+        <div>
+          <strong>创建新分组</strong>
+          <p>分组名不能为空，且同一用户下不能重复。</p>
+        </div>
+
+        <div class="group-manager__create-form">
+          <Input
+            v-model="newGroupName"
+            maxlength="100"
+            placeholder="例如：科幻 / 已读 / 收藏"
+            :disabled="busy"
+            @keydown.enter.prevent="emitCreate"
+          />
+          <Button :disabled="busy || !newGroupName.trim()" @click="emitCreate">
+            创建分组
+          </Button>
+        </div>
+      </section>
+
+      <div v-if="groups.length === 0" class="flex flex-col items-center justify-center py-8 text-gray-500">
+        <p>还没有真实分组</p>
+        <p class="text-sm">可以先创建一个。</p>
       </div>
 
-      <div class="group-manager__create-form">
-        <n-input
-          v-model:value="newGroupName"
-          maxlength="100"
-          placeholder="例如：科幻 / 已读 / 收藏"
-          :disabled="busy"
-          @keydown.enter.prevent="emitCreate"
-        />
-        <n-button type="primary" :disabled="busy || !newGroupName.trim()" @click="emitCreate">
-          创建分组
-        </n-button>
-      </div>
-    </section>
-
-    <n-empty v-if="groups.length === 0" description="还没有真实分组，可以先创建一个。" />
-
-    <section v-else class="group-manager__list">
-      <article v-for="group in groups" :key="group.id" class="group-manager__item">
-        <template v-if="editingGroupId === group.id">
-          <div class="group-manager__edit-row">
-            <n-input
-              v-model:value="editingName"
-              maxlength="100"
-              :disabled="busy"
-              @keydown.enter.prevent="emitRename(group.id)"
-            />
-            <n-button tertiary :disabled="busy" @click="cancelEdit">取消</n-button>
-            <n-button type="primary" :disabled="busy || !editingName.trim()" @click="emitRename(group.id)">
-              保存
-            </n-button>
-          </div>
-        </template>
-
-        <template v-else>
-          <div class="group-manager__meta">
-            <div>
-              <strong>{{ group.name }}</strong>
-              <p>当前包含 {{ group.book_count }} 本书</p>
+      <section v-else class="group-manager__list">
+        <article v-for="group in groups" :key="group.id" class="group-manager__item">
+          <template v-if="editingGroupId === group.id">
+            <div class="group-manager__edit-row">
+              <Input
+                v-model="editingName"
+                maxlength="100"
+                :disabled="busy"
+                @keydown.enter.prevent="emitRename(group.id)"
+              />
+              <Button variant="ghost" :disabled="busy" @click="cancelEdit">取消</Button>
+              <Button :disabled="busy || !editingName.trim()" @click="emitRename(group.id)">
+                保存
+              </Button>
             </div>
-            <n-tag round :bordered="false">{{ group.book_count }} 本</n-tag>
-          </div>
+          </template>
 
-          <div class="group-manager__actions">
-            <n-button tertiary size="small" :disabled="busy" @click="startEdit(group)">
-              重命名
-            </n-button>
-            <n-popconfirm @positive-click="() => emitDelete(group.id)">
-              <template #trigger>
-                <n-button tertiary size="small" type="error" :disabled="busy">
-                  删除
-                </n-button>
-              </template>
-              删除前会做安全校验，确认继续吗？
-            </n-popconfirm>
-          </div>
-        </template>
-      </article>
-    </section>
-  </n-modal>
+          <template v-else>
+            <div class="group-manager__meta">
+              <div>
+                <strong>{{ group.name }}</strong>
+                <p>当前包含 {{ group.book_count }} 本书</p>
+              </div>
+              <Badge variant="secondary">{{ group.book_count }} 本</Badge>
+            </div>
+
+            <div class="group-manager__actions">
+              <Button variant="ghost" size="sm" :disabled="busy" @click="startEdit(group)">
+                重命名
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                class="text-red-600 hover:text-red-700"
+                :disabled="busy"
+                @click="confirmDelete(group.id, group.name)"
+              >
+                删除
+              </Button>
+            </div>
+          </template>
+        </article>
+      </section>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { NButton, NEmpty, NInput, NModal, NPopconfirm, NTag } from "naive-ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 import type { BookGroup } from "../types/api";
 
@@ -146,8 +153,10 @@ function emitRename(groupId: number) {
   cancelEdit();
 }
 
-function emitDelete(groupId: number) {
-  emit("delete", groupId);
+function confirmDelete(groupId: number, groupName: string) {
+  if (confirm(`删除前会做安全校验，确认删除「${groupName}」吗？`)) {
+    emit("delete", groupId);
+  }
 }
 </script>
 
@@ -176,8 +185,8 @@ function emitDelete(groupId: number) {
   flex-wrap: wrap;
 }
 
-.group-manager__create-form :deep(.n-input),
-.group-manager__edit-row :deep(.n-input) {
+.group-manager__create-form :deep(input),
+.group-manager__edit-row :deep(input) {
   flex: 1;
 }
 

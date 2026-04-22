@@ -3,7 +3,7 @@
 本项目是个人使用的 TXT 在线阅读器，支持书架、目录、阅读进度同步和用户自定义章节正则。
 
 ## Stack
-- Frontend: Vue 3 + Vite + TypeScript + Vue Router + Pinia + Naive UI
+- Frontend: Vue 3 + Vite + TypeScript + Vue Router + Pinia + Shadcn Vue + Tailwind CSS
 - Backend: FastAPI + SQLAlchemy + SQLite
 
 ## Architecture Rules

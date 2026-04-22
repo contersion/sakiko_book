@@ -1,19 +1,71 @@
 <template>
-  <n-drawer
-    v-if="isCompactViewport"
-    :show="show"
-    placement="right"
-    :width="drawerWidth"
-    :auto-focus="false"
-    @update:show="handleShowChange"
-  >
-    <n-drawer-content title="目录" closable body-content-style="padding: 20px;">
-      <section class="chapter-catalog-panel chapter-catalog-panel--drawer">
-        <div class="chapter-catalog-panel__summary">
+  <!-- Mobile: right drawer -->
+  <transition name="catalog-drawer">
+    <div
+      v-if="isCompactViewport && show"
+      class="catalog-drawer"
+      @click="handleShowChange(false)"
+    >
+      <div
+        class="catalog-drawer__panel"
+        :style="{ width: drawerWidth + 'px' }"
+        @click.stop
+      >
+        <section class="chapter-catalog-panel chapter-catalog-panel--drawer">
+          <div class="chapter-catalog-panel__summary">
+            <div class="chapter-catalog-panel__heading">
+              <strong>目录</strong>
+              <span class="chapter-catalog-panel__count">{{ chapterCountLabel }}</span>
+            </div>
+            <p v-if="bookTitle" class="chapter-catalog-panel__book">{{ bookTitle }}</p>
+            <p class="chapter-catalog-panel__hint">
+              点击任意章节后会直接跳转到阅读页，并自动关闭目录面板。
+            </p>
+          </div>
+
+          <div class="chapter-catalog-panel__body">
+            <div v-if="chapters.length === 0" class="chapter-catalog-panel__empty flex flex-col items-center justify-center py-8 text-gray-500">
+              <p>当前还没有可展示的目录</p>
+              <p class="text-sm">请稍后再试或重新解析目录。</p>
+            </div>
+
+            <div v-else class="chapter-catalog-list">
+              <button
+                v-for="chapter in chapters"
+                :key="`drawer-${chapter.id}`"
+                type="button"
+                class="chapter-catalog-list__item"
+                @click="handleChapterSelect(chapter.chapter_index)"
+              >
+                <span class="chapter-catalog-list__index">
+                  {{ formatChapterOrdinal(chapter.chapter_index) }}
+                </span>
+                <strong class="chapter-catalog-list__title">{{ chapter.chapter_title }}</strong>
+                <span class="chapter-catalog-list__meta">
+                  范围 {{ formatNumber(chapter.start_offset) }} - {{ formatNumber(chapter.end_offset) }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </transition>
+
+  <!-- Desktop: Dialog -->
+  <Dialog :open="!isCompactViewport && show" @update:open="handleShowChange">
+    <DialogContent class="max-w-2xl">
+      <DialogHeader>
+        <DialogTitle>
           <div class="chapter-catalog-panel__heading">
             <strong>目录</strong>
             <span class="chapter-catalog-panel__count">{{ chapterCountLabel }}</span>
           </div>
+        </DialogTitle>
+      </DialogHeader>
+
+      <section class="chapter-catalog-panel chapter-catalog-panel--modal">
+        <div class="chapter-catalog-panel__summary">
           <p v-if="bookTitle" class="chapter-catalog-panel__book">{{ bookTitle }}</p>
           <p class="chapter-catalog-panel__hint">
             点击任意章节后会直接跳转到阅读页，并自动关闭目录面板。
@@ -21,16 +73,15 @@
         </div>
 
         <div class="chapter-catalog-panel__body">
-          <n-empty
-            v-if="chapters.length === 0"
-            description="当前还没有可展示的目录，请稍后再试或重新解析目录。"
-            class="chapter-catalog-panel__empty"
-          />
+          <div v-if="chapters.length === 0" class="chapter-catalog-panel__empty flex flex-col items-center justify-center py-8 text-gray-500">
+            <p>当前还没有可展示的目录</p>
+            <p class="text-sm">请稍后再试或重新解析目录。</p>
+          </div>
 
           <div v-else class="chapter-catalog-list">
             <button
               v-for="chapter in chapters"
-              :key="`drawer-${chapter.id}`"
+              :key="`modal-${chapter.id}`"
               type="button"
               class="chapter-catalog-list__item"
               @click="handleChapterSelect(chapter.chapter_index)"
@@ -46,65 +97,18 @@
           </div>
         </div>
       </section>
-    </n-drawer-content>
-  </n-drawer>
-
-  <n-modal
-    v-else
-    :show="show"
-    preset="card"
-    closable
-    :mask-closable="true"
-    :style="{ width: 'min(720px, calc(100vw - 32px))' }"
-    @update:show="handleShowChange"
-  >
-    <template #header>
-      <div class="chapter-catalog-panel__heading">
-        <strong>目录</strong>
-        <span class="chapter-catalog-panel__count">{{ chapterCountLabel }}</span>
-      </div>
-    </template>
-
-    <section class="chapter-catalog-panel chapter-catalog-panel--modal">
-      <div class="chapter-catalog-panel__summary">
-        <p v-if="bookTitle" class="chapter-catalog-panel__book">{{ bookTitle }}</p>
-        <p class="chapter-catalog-panel__hint">
-          点击任意章节后会直接跳转到阅读页，并自动关闭目录面板。
-        </p>
-      </div>
-
-      <div class="chapter-catalog-panel__body">
-        <n-empty
-          v-if="chapters.length === 0"
-          description="当前还没有可展示的目录，请稍后再试或重新解析目录。"
-          class="chapter-catalog-panel__empty"
-        />
-
-        <div v-else class="chapter-catalog-list">
-          <button
-            v-for="chapter in chapters"
-            :key="`modal-${chapter.id}`"
-            type="button"
-            class="chapter-catalog-list__item"
-            @click="handleChapterSelect(chapter.chapter_index)"
-          >
-            <span class="chapter-catalog-list__index">
-              {{ formatChapterOrdinal(chapter.chapter_index) }}
-            </span>
-            <strong class="chapter-catalog-list__title">{{ chapter.chapter_title }}</strong>
-            <span class="chapter-catalog-list__meta">
-              范围 {{ formatNumber(chapter.start_offset) }} - {{ formatNumber(chapter.end_offset) }}
-            </span>
-          </button>
-        </div>
-      </div>
-    </section>
-  </n-modal>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { NDrawer, NDrawerContent, NEmpty, NModal } from "naive-ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import type { BookChapter } from "../types/api";
 import { formatNumber } from "../utils/format";
@@ -175,6 +179,50 @@ function formatChapterOrdinal(index: number) {
 </script>
 
 <style scoped>
+.catalog-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.catalog-drawer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.catalog-drawer__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  overflow-y: auto;
+  background: #fff;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.catalog-drawer-enter-active,
+.catalog-drawer-leave-active {
+  transition: opacity 280ms ease;
+}
+
+.catalog-drawer-enter-from,
+.catalog-drawer-leave-to {
+  opacity: 0;
+}
+
+.catalog-drawer-enter-active .catalog-drawer__panel,
+.catalog-drawer-leave-active .catalog-drawer__panel {
+  transition: transform 280ms ease;
+}
+
+.catalog-drawer-enter-from .catalog-drawer__panel,
+.catalog-drawer-leave-to .catalog-drawer__panel {
+  transform: translateX(100%);
+}
+
 .chapter-catalog-panel {
   display: grid;
   gap: 18px;

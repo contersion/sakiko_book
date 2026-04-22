@@ -1,3 +1,70 @@
+## v1.06
+
+Date
+`2026-04-22`
+
+Summary
+本次版本是一次完整的前端 UI 框架迁移：将全站从 Naive UI 迁移到 Shadcn Vue + Tailwind CSS，并彻底移除 naive-ui 依赖。迁移后前端构建产物从约 1036 KB 降至 384 KB（gzip 后 125 KB），chunk 超限警告消失，Docker 构建速度和产物体积均有显著改善。
+
+Frontend
+- 全局迁移 Naive UI → Shadcn Vue + Tailwind CSS：
+  - 全部 24 个 Naive UI 组件均完成替换
+  - `n-button` → Shadcn `Button`
+  - `n-input` / `n-input[type="textarea"]` → Shadcn `Input` / 原生 `textarea`
+  - `n-select` → Reka UI `Select`
+  - `n-card` → 原生 div + Tailwind
+  - `n-alert` → 自定义 `Alert`
+  - `n-badge` / `n-tag` → Shadcn `Badge`
+  - `n-dialog` / `n-modal` → Reka UI `Dialog`
+  - `n-drawer` → 自定义 CSS Drawer（过渡动画 + 遮罩层）
+  - `n-slider` → Reka UI `Slider`
+  - `n-skeleton` → 自定义 `Skeleton`
+  - `n-progress` → 自定义 CSS progress bar
+  - `n-upload` → 原生 `<input type="file">`
+  - `n-data-table` / `n-table` → 原生 HTML table + 手动分页
+  - `n-radio-group` / `n-radio-button` → 自定义 radio
+  - `n-checkbox` → 原生 checkbox
+  - `n-form` / `n-form-item` → 原生 `div` / `label`
+  - `n-empty` → 自定义空状态
+  - `n-popconfirm` → `confirm()` / 自定义 Dialog
+  - `n-space` → `div` + flex gap
+  - `n-message` / `useMessage()` → `vue-sonner` + `notify` 适配层
+- 新增基建文件：
+  - `tailwind.config.js`
+  - `postcss.config.js`
+  - `components.json`
+  - `src/styles/tailwind.css`
+  - `src/lib/utils.ts` (`cn()` 工具函数)
+  - `src/utils/notify.ts` (通知适配层)
+  - `src/components/AppProvider.vue` (全局 Toaster Provider)
+  - `src/components/ui/` 组件库目录（Button、Input、Select、Dialog、Alert、Badge、Card、Skeleton、Slider、Tabs、Sonner、Separator 等）
+- 按页面完成迁移：
+  - `App.vue` / `AppLayout.vue` / `LoginPage.vue` / `BookshelfPage.vue`
+  - `BookDetailPage.vue` / `RuleManagementPage.vue` / `ReaderPage.vue`
+  - `PagePlaceholder.vue` / `BackendSwitchModal.vue` / `BookGroupManagerModal.vue`
+  - `BookGroupSelectorModal.vue` / `ChapterCatalogModalDrawer.vue`
+- 移除 `naive-override.css`（不再需要）
+- 从 `package.json` 移除 `naive-ui`，npm 依赖减少 21 个包
+
+Docs
+- 新建 `frontend/MIGRATION.md`，记录完整迁移过程、组件映射表和构建体积变化
+- 更新 `README.md` 技术栈描述：`Naive UI` → `Shadcn Vue + Tailwind CSS`
+- 更新 `AGENTS.md` 技术栈描述
+- 更新 `frontend/README.md` 技术栈描述
+- 历史文档（`development-process.md`、`docs/IMPLEMENTATION_STEPS.md`）保持原样，反映当时实现决策
+
+Build
+- 前端 `npm run build` 零错误通过（`vue-tsc -b && vite build`）
+- JS 产物：384 KB（gzip: 125 KB）
+- 无 chunk > 500KB 警告
+
+Verification
+- Docker 前端镜像重建验证通过：
+  - `docker compose up -d --build`
+  - 前端 `http://localhost:21413` 正常访问
+  - 后端 `http://localhost:9000` 正常访问
+  - 构建产物中 `naive` 关键词数量为 0
+
 ## v1.05
 
 Date
@@ -5,22 +72,22 @@ Date
 
 Summary
 本次版本是一次聚焦阅读页与书架页细节体验的定点修复，不做整页重构，只修正本轮对话中明确指出且已完成验证的问题：
-- 修正书架页顶部工具区排版，让“刷新 / 分组管理 / 编辑 / 上传TXT”稳定处于同一行工具操作区内。
+- 修正书架页顶部工具区排版，让"刷新 / 分组管理 / 编辑 / 上传TXT"稳定处于同一行工具操作区内。
 - 修正阅读页移动端顶部进度信息块仍然显示的问题，仅在手机端隐藏该区块，不影响进度计算、同步与状态管理。
-- 修正阅读页“段间距”设置无明显效果的问题，让设置真实作用到正文段落之间。
-- 修正阅读页“阅读宽度”在手机端不生效的问题，同时保持 PC 端宽度控制逻辑可用。
+- 修正阅读页"段间距"设置无明显效果的问题，让设置真实作用到正文段落之间。
+- 修正阅读页"阅读宽度"在手机端不生效的问题，同时保持 PC 端宽度控制逻辑可用。
 - 修正阅读页首段没有首行缩进的问题，统一首段与后续段落的排版表现。
 - 完成最新代码的 Docker 重建与部署验证。
 
 Frontend
 - 书架页工具区响应式样式收口：
   - 顶部 4 个操作项恢复为单行横向工具区。
-  - 移动端优先保持同一行，使用轻量压缩与横向滚动兜底，不再拆成松散竖排或让“上传TXT”单独掉行。
+  - 移动端优先保持同一行，使用轻量压缩与横向滚动兜底，不再拆成松散竖排或让"上传TXT"单独掉行。
 - 阅读页移动端顶部进度块修正：
-  - 手机端隐藏“当前进度 / 百分比 / 已同步/待同步”整块 UI。
+  - 手机端隐藏"当前进度 / 百分比 / 已同步/待同步"整块 UI。
   - PC / 大屏保持原样。
 - 阅读页正文排版链路修正：
-  - 正文分段逻辑调整为按换行生成真实段落，避免大段正文合并成单个 `<p>`，让“段间距”设置可以立即体现。
+  - 正文分段逻辑调整为按换行生成真实段落，避免大段正文合并成单个 `<p>`，让"段间距"设置可以立即体现。
   - 段落样式新增统一的 CSS 首行缩进，不再依赖原文开头空格。
   - 为手机端补充独立的阅读宽度映射逻辑，阅读宽度滑块在小屏下也能直接影响正文容器宽度。
   - 保留章节切换、滚动阅读、进度恢复与同步逻辑，不改阅读业务层。
@@ -44,12 +111,12 @@ Date
 
 Summary
 本次版本围绕前端阅读产品体验与多后端接入能力展开，完成了以下几类更新：
-- 新增前端“切换后端”能力，支持本地 / 远程后端切换、运行时请求跟随后端、按后端隔离 token 与登录态。
-- 收口全站最小必要主题变量，统一页面表面层级、圆角、间距与控件尺度，让界面更贴近“简洁阅读感”。
+- 新增前端"切换后端"能力，支持本地 / 远程后端切换、运行时请求跟随后端、按后端隔离 token 与登录态。
+- 收口全站最小必要主题变量，统一页面表面层级、圆角、间距与控件尺度，让界面更贴近"简洁阅读感"。
 - 优化切换后端弹窗在 PC / Mobile 下的布局可读性，并让登录页、顶部导航与后端状态展示保持一致。
 - 优化书架页工具栏布局与目录规则页首屏层级。
 - 重点修复目录规则页手机端严重响应式问题，使其在窄屏下可完整显示、可完整操作。
-- 调整阅读页移动端信息展示，仅在手机端隐藏顶部“当前进度 / 百分比 / 待同步”区块，不影响进度计算与同步逻辑。
+- 调整阅读页移动端信息展示，仅在手机端隐藏顶部"当前进度 / 百分比 / 待同步"区块，不影响进度计算与同步逻辑。
 
 Frontend
 - 新增后端配置工具，支持本地 / 远程模式、后端地址校验、当前后端摘要显示、切换提示持久化。
@@ -57,7 +124,7 @@ Frontend
 - token 持久化改为按 backend 维度隔离，避免本地与远程后端串用登录态。
 - auth store 新增 backend 上下文同步与切换处理，切换后端时安全清空当前会话。
 - 阅读页 keepalive 保存进度请求已跟随后端切换逻辑。
-- 登录页与应用顶栏新增“切换后端”入口，后端摘要文案统一为中文。
+- 登录页与应用顶栏新增"切换后端"入口，后端摘要文案统一为中文。
 - 收口最小必要的主题 token：surface、border、shadow、radius、spacing、control height、title / caption 字级。
 - 书架页顶部整理为统一工具栏区域：
   - 排序 / 搜索 / 分组筛选整合为同一块响应式工具栏。
@@ -71,14 +138,14 @@ Frontend
   - 统计卡片在手机端改为横向紧凑排列，避免竖向占用过多空间。
   - 规则列表在手机端切换为卡片列表，不再沿用不适合窄屏的表格结构。
   - regex / 长文本统一采用代码块样式并支持横向滚动，不再撑坏布局。
-  - “将规则应用到书籍”与“规则测试与预览”在手机端改为单列优先布局。
+  - "将规则应用到书籍"与"规则测试与预览"在手机端改为单列优先布局。
   - 应用结果与测试结果在手机端改为卡片式结果展示，确保完整查看与操作。
 - 阅读页移动端隐藏顶部进度块，仅保留必要的进度与同步逻辑，不影响 PC 端原有布局。
 
 UX
 - 切换后端弹窗从线性表单调整为更清晰的状态卡片 + 模式选择 + 输入区 + 按钮区结构。
 - Mobile 端切换后端弹窗避免了说明文字与控件拥挤、按钮主次不清的问题。
-- 书架页工具栏和目录规则页首屏都改为“内容优先、控件尺度统一、窄屏优先可用”的响应式策略。
+- 书架页工具栏和目录规则页首屏都改为"内容优先、控件尺度统一、窄屏优先可用"的响应式策略。
 - 目录规则页手机端不再依赖横向滚动表格完成核心操作，显著提升可用性。
 
 Deployment
@@ -179,7 +246,7 @@ Version: 1.02
 
 这一版的目标是同时改善阅读产品的使用体验与后端调试入口的环境隔离能力：
 
-- 前端让书籍详情页从“目录占满页面”的长内容布局，切换为更轻量的“按钮 + 弹层”交互。
+- 前端让书籍详情页从"目录占满页面"的长内容布局，切换为更轻量的"按钮 + 弹层"交互。
 - 后端让接口文档端点真正跟随 `DEBUG` 开关工作，避免在非调试环境继续暴露 Swagger UI / OpenAPI 文档。
 
 ## Changes
@@ -189,7 +256,7 @@ Version: 1.02
 本次更新对书籍详情页的目录展示方式进行了重新整理：
 
 - 书籍详情页不再默认整页展开目录列表
-- 目录改为通过“查看目录”按钮触发弹窗 / 抽屉显示
+- 目录改为通过"查看目录"按钮触发弹窗 / 抽屉显示
 - 详情页原先的目录说明卡片 / 注释区域已移除
 - 页面主体只保留书籍信息、文件信息、目录规则信息等核心内容
 - 用户现在可以在弹层中浏览章节目录，并直接点击章节跳转到阅读页
@@ -213,12 +280,12 @@ Version: 1.02
 调整后的交互表现为：
 
 - 目录内容不再直接堆叠在详情页中
-- 用户通过“查看目录”按钮进入目录弹层
+- 用户通过"查看目录"按钮进入目录弹层
 - 桌面端更适合以弹窗方式查看目录
 - 小屏设备可用抽屉方式浏览目录
 - 目录说明提示块已经删除，详情页视觉更干净、层次更集中
 
-这让书籍详情页在长目录书籍场景下更容易浏览，也更符合“详情页看概览、目录交互放到弹层里”的使用预期。
+这让书籍详情页在长目录书籍场景下更容易浏览，也更符合"详情页看概览、目录交互放到弹层里"的使用预期。
 
 ## Bug Fixes
 
@@ -232,7 +299,7 @@ Version: 1.02
 - `/redoc`
 - `/openapi.json`
 
-这与“非调试环境应关闭接口文档入口”的预期不一致。
+这与"非调试环境应关闭接口文档入口"的预期不一致。
 
 #### 背景说明
 

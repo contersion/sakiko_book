@@ -1,18 +1,22 @@
 <template>
   <div class="book-detail-page">
     <section class="book-detail-page__topbar">
-      <n-button tertiary @click="goBack">返回书架</n-button>
+      <Button variant="ghost" @click="goBack">返回书架</Button>
       <span class="book-detail-page__crumb">Book ID: {{ bookId }}</span>
     </section>
 
     <section v-if="loading" class="book-detail-page__loading">
-      <n-card :bordered="false" class="book-detail-page__loading-card">
-        <n-skeleton text :repeat="4" />
-        <n-skeleton style="margin-top: 18px;" text :repeat="3" />
-      </n-card>
-      <n-card :bordered="false" class="book-detail-page__loading-card">
-        <n-skeleton text :repeat="8" />
-      </n-card>
+      <div class="book-detail-page__loading-card detail-card">
+        <div class="space-y-3">
+          <Skeleton v-for="i in 4" :key="i" class="h-4 w-full" />
+          <Skeleton v-for="i in 3" :key="i+4" class="h-4 w-3/4" />
+        </div>
+      </div>
+      <div class="book-detail-page__loading-card detail-card">
+        <div class="space-y-3">
+          <Skeleton v-for="i in 8" :key="i" class="h-4 w-full" />
+        </div>
+      </div>
     </section>
 
     <page-status-panel
@@ -22,7 +26,7 @@
       :description="pageError"
     >
       <template #action>
-        <n-button type="primary" @click="reloadPage">重新加载</n-button>
+        <Button @click="reloadPage">重新加载</Button>
       </template>
     </page-status-panel>
 
@@ -53,32 +57,32 @@
           </p>
 
           <div class="detail-hero__tags">
-            <n-tag round :bordered="false">总章节 {{ formatNumber(book.total_chapters) }}</n-tag>
-            <n-tag round :bordered="false">总字数 {{ formatWordCount(book.total_words) }}</n-tag>
-            <n-tag round :bordered="false">当前规则 {{ currentRuleName }}</n-tag>
-            <n-tag round :bordered="false">{{ progressTagLabel }}</n-tag>
-            <n-tag round :bordered="false">{{ progressPercentLabel }}</n-tag>
+            <Badge variant="secondary">总章节 {{ formatNumber(book.total_chapters) }}</Badge>
+            <Badge variant="secondary">总字数 {{ formatWordCount(book.total_words) }}</Badge>
+            <Badge variant="secondary">当前规则 {{ currentRuleName }}</Badge>
+            <Badge variant="secondary">{{ progressTagLabel }}</Badge>
+            <Badge variant="secondary">{{ progressPercentLabel }}</Badge>
           </div>
 
           <div class="detail-hero__actions">
-            <n-button type="primary" size="large" :loading="readingPending" @click="handleReadAction">
+            <Button size="lg" :disabled="readingPending" @click="handleReadAction">
               {{ readActionLabel }}
-            </n-button>
-            <n-button tertiary size="large" @click="openCatalog">
+            </Button>
+            <Button variant="ghost" size="lg" @click="openCatalog">
               查看目录
-            </n-button>
-            <n-button secondary size="large" @click="openEditor">
+            </Button>
+            <Button variant="outline" size="lg" @click="openEditor">
               编辑信息
-            </n-button>
+            </Button>
           </div>
         </div>
       </section>
 
       <section class="detail-grid">
-        <n-card :bordered="false" class="detail-card">
-          <template #header>
+        <div class="detail-card">
+          <div class="detail-card__header">
             <span class="detail-card__heading">阅读信息</span>
-          </template>
+          </div>
 
           <div class="detail-info-grid">
             <div class="detail-info-item">
@@ -108,23 +112,17 @@
           <div class="detail-group-list">
             <span class="detail-group-list__label">分组</span>
             <div class="detail-group-list__tags">
-              <n-tag
-                v-for="group in book.groups"
-                :key="group.id"
-                round
-                :bordered="false"
-                type="warning"
-              >
+              <Badge v-for="group in book.groups" :key="group.id" variant="secondary">
                 {{ group.name }}
-              </n-tag>
+              </Badge>
             </div>
           </div>
-        </n-card>
+        </div>
 
-        <n-card :bordered="false" class="detail-card">
-          <template #header>
+        <div class="detail-card">
+          <div class="detail-card__header">
             <span class="detail-card__heading">文件信息</span>
-          </template>
+          </div>
 
           <div class="detail-info-grid">
             <div class="detail-info-item">
@@ -149,12 +147,12 @@
             <span class="detail-file-path__label">本地文件</span>
             <code>{{ book.file_path }}</code>
           </div>
-        </n-card>
+        </div>
 
-        <n-card :bordered="false" class="detail-card detail-card--full">
-          <template #header>
+        <div class="detail-card detail-card--full">
+          <div class="detail-card__header">
             <span class="detail-card__heading">目录规则</span>
-          </template>
+          </div>
 
           <div class="detail-rule-card">
             <div class="detail-rule-card__current">
@@ -163,37 +161,35 @@
               <p>{{ currentRuleDescription }}</p>
             </div>
 
-            <n-alert v-if="rulesError" type="warning" :show-icon="false" class="detail-rule-card__alert">
+            <Alert v-if="rulesError" variant="warning" class="detail-rule-card__alert">
               {{ rulesError }}
-            </n-alert>
+            </Alert>
 
             <div class="detail-rule-card__actions">
-              <n-select
-                v-model:value="selectedRuleId"
-                :options="ruleOptions"
-                :disabled="reparsePending || ruleOptions.length === 0"
-                placeholder="选择目录规则"
-              />
-              <n-button
-                secondary
-                :loading="reparsePending"
-                :disabled="!selectedRuleId"
+              <Select v-model="selectedRuleId" :disabled="reparsePending || ruleOptions.length === 0">
+                <SelectTrigger>
+                  <SelectValue placeholder="选择目录规则" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="opt in ruleOptions" :key="opt.value" :value="String(opt.value)">
+                    {{ opt.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                :disabled="reparsePending || !selectedRuleId"
                 @click="handleReparse"
               >
                 重新解析目录
-              </n-button>
+              </Button>
             </div>
           </div>
-        </n-card>
+        </div>
       </section>
 
-      <n-modal
-        v-model:show="editorVisible"
-        preset="card"
-        class="metadata-modal"
-        title="编辑书籍信息"
-        :bordered="false"
-      >
+      <Dialog :open="editorVisible" @update:open="editorVisible = $event">
+      <DialogContent class="metadata-modal max-w-3xl">
         <div class="metadata-modal__layout">
           <div class="metadata-modal__cover-panel">
             <div class="metadata-modal__cover" :class="{ 'metadata-modal__cover--filled': !!book.cover_url }">
@@ -211,58 +207,59 @@
             </div>
 
             <div class="metadata-modal__cover-actions">
-              <n-upload
+              <input
+                ref="coverInputRef"
+                type="file"
                 accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                :show-file-list="false"
-                :max="1"
-                :custom-request="handleCoverUpload"
-              >
-                <n-button secondary :loading="coverUploading">上传封面</n-button>
-              </n-upload>
-              <n-button
+                class="sr-only"
+                @change="handleCoverUpload"
+              />
+              <Button variant="outline" :disabled="coverUploading" @click="coverInputRef?.click()">
+                上传封面
+              </Button>
+              <Button
                 v-if="book.cover_url"
-                quaternary
-                type="error"
-                :loading="coverDeleting"
+                variant="ghost"
+                class="text-red-600 hover:text-red-700"
+                :disabled="coverDeleting"
                 @click="handleRemoveCover"
               >
                 删除封面
-              </n-button>
+              </Button>
             </div>
           </div>
 
           <div class="metadata-modal__form">
             <label class="metadata-modal__field">
               <span>书名</span>
-              <n-input v-model:value="editableTitle" placeholder="用于全局显示的书名" clearable />
+              <Input v-model="editableTitle" placeholder="用于全局显示的书名" />
             </label>
 
             <label class="metadata-modal__field">
               <span>作者</span>
-              <n-input v-model:value="editableAuthor" placeholder="作者可留空" clearable />
+              <Input v-model="editableAuthor" placeholder="作者可留空" />
             </label>
 
             <label class="metadata-modal__field">
               <span>简介</span>
-              <n-input
-                v-model:value="editableDescription"
-                type="textarea"
+              <textarea
+                v-model="editableDescription"
                 placeholder="支持多行简介"
-                :autosize="{ minRows: 6, maxRows: 12 }"
-              />
+                rows="6"
+                class="metadata-modal__textarea"
+              ></textarea>
             </label>
           </div>
         </div>
 
-        <template #action>
-          <div class="metadata-modal__footer">
-            <n-button @click="editorVisible = false">取消</n-button>
-            <n-button type="primary" :loading="metadataSaving" @click="handleSaveMetadata">
-              保存修改
-            </n-button>
-          </div>
-        </template>
-      </n-modal>
+        <div class="metadata-modal__footer">
+          <Button variant="ghost" @click="editorVisible = false">取消</Button>
+          <Button :disabled="metadataSaving" @click="handleSaveMetadata">
+            保存修改
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
 
       <chapter-catalog-modal-drawer
         v-model:show="catalogVisible"
@@ -277,20 +274,25 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import {
-  NAlert,
-  NButton,
-  NCard,
-  NInput,
-  NModal,
-  NSelect,
-  NSkeleton,
-  NTag,
-  NUpload,
-  useMessage,
-  type UploadCustomRequestOptions,
-} from "naive-ui";
 import { useRouter } from "vue-router";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { notify } from "@/utils/notify";
+
 
 import { booksApi } from "../api/books";
 import { resolveApiAssetUrl, ApiError, getErrorMessage } from "../api/client";
@@ -305,7 +307,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
-const message = useMessage();
+
 const BOOK_METADATA_UPDATED_EVENT = "books:metadata-updated";
 const book = ref<BookDetail | null>(null);
 const chapters = ref<BookChapter[]>([]);
@@ -520,24 +522,25 @@ async function handleSaveMetadata() {
       window.dispatchEvent(new CustomEvent(BOOK_METADATA_UPDATED_EVENT, { detail: { bookId: book.value.id } }));
     }
     editorVisible.value = false;
-    message.success("书籍信息已保存");
+    notify.success("书籍信息已保存");
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     metadataSaving.value = false;
   }
 }
 
-async function handleCoverUpload(options: UploadCustomRequestOptions) {
+const coverInputRef = ref<HTMLInputElement | null>(null);
+
+async function handleCoverUpload(event: Event) {
   if (!book.value) {
-    options.onError?.();
     return;
   }
 
-  const file = options.file.file;
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
   if (!(file instanceof File)) {
-    options.onError?.();
-    message.error("未找到可上传的封面文件");
+    notify.error("未找到可上传的封面文件");
     return;
   }
 
@@ -546,13 +549,14 @@ async function handleCoverUpload(options: UploadCustomRequestOptions) {
   try {
     const updated = await booksApi.uploadCover(book.value.id, file);
     book.value = updated;
-    options.onFinish?.();
-    message.success("封面已更新");
+    notify.success("封面已更新");
   } catch (error) {
-    options.onError?.();
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     coverUploading.value = false;
+    if (coverInputRef.value) {
+      coverInputRef.value.value = "";
+    }
   }
 }
 
@@ -567,9 +571,9 @@ async function handleRemoveCover() {
     await booksApi.deleteCover(book.value.id);
     const refreshed = await booksApi.detail(book.value.id);
     book.value = refreshed;
-    message.success("封面已删除");
+    notify.success("封面已删除");
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     coverDeleting.value = false;
   }
@@ -577,7 +581,7 @@ async function handleRemoveCover() {
 
 async function handleReparse() {
   if (!selectedRuleId.value) {
-    message.warning("请先选择一个目录规则");
+    notify.info("请先选择一个目录规则");
     return;
   }
 
@@ -585,10 +589,10 @@ async function handleReparse() {
 
   try {
     await booksApi.reparse(props.bookId, selectedRuleId.value);
-    message.success("目录已重新解析");
+    notify.success("目录已重新解析");
     await loadBookAndChapters();
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     reparsePending.value = false;
   }
@@ -751,6 +755,16 @@ watch(
 
 .detail-card__heading {
   font-weight: 700;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border-color-soft);
+}
+
+.detail-card {
+  border: 1px solid var(--border-color-soft);
+  border-radius: var(--radius-xl);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
 }
 
 .detail-card--full {
@@ -856,8 +870,7 @@ watch(
   gap: 12px;
 }
 
-.metadata-modal :deep(.n-card) {
-  width: min(920px, calc(100vw - 24px));
+.metadata-modal {
   border-radius: 24px;
 }
 
@@ -927,6 +940,25 @@ watch(
 .metadata-modal__field {
   display: grid;
   gap: 8px;
+}
+
+.metadata-modal__textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color-soft);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  transition: border-color 160ms ease;
+}
+.metadata-modal__textarea:focus {
+  border-color: var(--accent-color);
 }
 
 .metadata-modal__field span {

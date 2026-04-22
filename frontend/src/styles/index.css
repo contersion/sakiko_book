@@ -181,12 +181,6 @@ body.app-theme--dark .bookshelf-page__tab--active {
     0 6px 14px rgba(0, 0, 0, 0.24);
 }
 
-body.app-theme--dark .bookshelf-page__filter-actions .n-base-selection,
-body.app-theme--dark .bookshelf-page__filter-actions .n-input-wrapper {
-  background: var(--surface-input-bg);
-  border-color: var(--border-color-soft);
-}
-
 body.app-theme--dark .bookshelf-page__empty {
   border-color: var(--border-color-soft);
   background: var(--surface-empty-bg);

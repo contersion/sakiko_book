@@ -35,25 +35,25 @@
         </div>
 
         <div class="rule-page__toolbar-actions">
-          <n-button secondary :loading="loading" @click="loadInitialData">刷新页面</n-button>
-          <n-button type="primary" @click="openCreateModal">新增自定义规则</n-button>
+          <Button variant="outline" :disabled="loading" @click="loadInitialData">刷新页面</Button>
+          <Button @click="openCreateModal">新增自定义规则</Button>
         </div>
       </section>
     </section>
 
-    <n-alert v-if="pageError" type="error" :show-icon="false" class="rule-page__alert">
+    <Alert v-if="pageError" variant="destructive" class="rule-page__alert">
       {{ pageError }}
-    </n-alert>
+    </Alert>
 
-    <n-card :bordered="false" class="rule-page__table-card">
-      <template #header>
+    <div class="rule-page__table-card">
+      <div class="rule-page__card-header">
         <span class="rule-page__card-title">规则列表</span>
-      </template>
-      <template #header-extra>
         <span class="rule-page__card-subtitle">表格 + 弹窗表单</span>
-      </template>
+      </div>
 
-      <n-empty v-if="!loading && rules.length === 0" description="还没有可展示的规则。" />
+      <div v-if="!loading && rules.length === 0" class="flex flex-col items-center justify-center py-16 text-gray-500">
+        <p>还没有可展示的规则</p>
+      </div>
 
       <div v-else-if="isMobileViewport" class="rule-mobile-list" aria-label="规则卡片列表">
         <article
@@ -68,12 +68,8 @@
             </div>
 
             <div class="rule-mobile-card__badges">
-              <n-tag size="small" round :bordered="false" :type="rule.is_builtin ? 'warning' : 'info'">
-                {{ rule.is_builtin ? "内置" : "自定义" }}
-              </n-tag>
-              <n-tag v-if="rule.is_default" size="small" round :bordered="false" type="success">
-                当前默认
-              </n-tag>
+              <Badge variant="secondary">{{ rule.is_builtin ? "内置" : "自定义" }}</Badge>
+              <Badge v-if="rule.is_default" variant="default">当前默认</Badge>
             </div>
           </div>
 
@@ -94,48 +90,121 @@
           </div>
 
           <div class="rule-mobile-card__actions">
-            <n-button block secondary @click="loadRuleIntoTest(rule)">带入测试</n-button>
-            <n-button block tertiary @click="loadRuleIntoApply(rule)">应用到书</n-button>
-            <n-button
-              block
-              :secondary="!rule.is_default"
-              :type="rule.is_default ? 'success' : 'primary'"
+            <Button variant="outline" class="w-full" @click="loadRuleIntoTest(rule)">带入测试</Button>
+            <Button variant="ghost" class="w-full" @click="loadRuleIntoApply(rule)">应用到书</Button>
+            <Button
+              class="w-full"
+              :variant="rule.is_default ? 'default' : 'outline'"
               :disabled="rule.is_default"
               @click="() => { void handleSetDefault(rule); }"
             >
               {{ rule.is_default ? "默认中" : "设为默认" }}
-            </n-button>
-            <n-button v-if="!rule.is_builtin" block tertiary @click="openEditModal(rule)">编辑</n-button>
-            <n-popconfirm v-if="!rule.is_builtin" @positive-click="() => { void handleDelete(rule); }">
-              <template #trigger>
-                <n-button block tertiary type="error">删除</n-button>
-              </template>
-              删除后无法恢复，确认继续吗？
-            </n-popconfirm>
+            </Button>
+            <Button
+              v-if="!rule.is_builtin"
+              variant="ghost"
+              class="w-full"
+              @click="openEditModal(rule)"
+            >
+              编辑
+            </Button>
+            <Button
+              v-if="!rule.is_builtin"
+              class="w-full text-red-600 hover:text-red-700"
+              variant="ghost"
+              @click="confirmDelete(rule)"
+            >
+              删除
+            </Button>
           </div>
         </article>
       </div>
 
       <div v-else class="rule-page__table-wrap">
-        <n-data-table
-          :columns="columns"
-          :data="rules"
-          :loading="loading"
-          :row-key="rowKey"
-          :single-line="false"
-          :pagination="pagination"
-          size="small"
-        />
-      </div>
-    </n-card>
+        <table class="rule-table">
+          <thead>
+            <tr>
+              <th>规则信息</th>
+              <th>正则表达式</th>
+              <th>Flags / 说明</th>
+              <th>更新时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="rule in paginatedRules" :key="rule.id">
+              <td>
+                <div class="rule-table__primary">
+                  <strong class="rule-table__title">{{ rule.rule_name }}</strong>
+                  <div class="rule-table__badges">
+                    <Badge variant="secondary">{{ rule.is_builtin ? "内置" : "自定义" }}</Badge>
+                    <Badge v-if="rule.is_default" variant="default">当前默认</Badge>
+                  </div>
+                </div>
+              </td>
+              <td><code class="rule-table__code">{{ rule.regex_pattern }}</code></td>
+              <td>
+                <div class="rule-table__secondary">
+                  <div class="rule-table__flags">{{ rule.flags || "无 flags" }}</div>
+                  <p class="rule-table__description">{{ rule.description || "暂无说明" }}</p>
+                </div>
+              </td>
+              <td><span class="rule-table__time">{{ formatDate(rule.updated_at) }}</span></td>
+              <td>
+                <div class="flex flex-wrap gap-2">
+                  <Button size="sm" variant="outline" @click="loadRuleIntoTest(rule)">带入测试</Button>
+                  <Button size="sm" variant="ghost" @click="loadRuleIntoApply(rule)">应用到书</Button>
+                  <Button
+                    size="sm"
+                    :variant="rule.is_default ? 'default' : 'outline'"
+                    :disabled="rule.is_default"
+                    @click="void handleSetDefault(rule)"
+                  >
+                    {{ rule.is_default ? "默认中" : "设为默认" }}
+                  </Button>
+                  <Button v-if="!rule.is_builtin" size="sm" variant="ghost" @click="openEditModal(rule)">编辑</Button>
+                  <Button
+                    v-if="!rule.is_builtin"
+                    size="sm"
+                    variant="ghost"
+                    class="text-red-600 hover:text-red-700"
+                    @click="confirmDeleteTable(rule)"
+                  >
+                    删除
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-    <n-card :bordered="false" class="rule-page__apply-card">
-      <template #header>
+        <div v-if="totalPages > 1" class="rule-table__pagination">
+          <Button
+            variant="ghost"
+            size="sm"
+            :disabled="currentPage <= 1"
+            @click="goToPage(currentPage - 1)"
+          >
+            上一页
+          </Button>
+          <span class="rule-table__page-info">第 {{ currentPage }} / {{ totalPages }} 页</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            :disabled="currentPage >= totalPages"
+            @click="goToPage(currentPage + 1)"
+          >
+            下一页
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-page__apply-card">
+      <div class="rule-page__card-header">
         <span class="rule-page__card-title">将规则应用到书籍</span>
-      </template>
-      <template #header-extra>
         <span class="rule-page__card-subtitle">快速重解析目录</span>
-      </template>
+      </div>
 
       <div class="rule-apply">
         <section class="rule-apply__form">
@@ -144,68 +213,55 @@
             <p>你可以从上方规则表点击“应用到书”，也可以在这里手动选择规则和目标书籍，然后立即触发重新解析。</p>
           </div>
 
-          <n-form label-placement="top">
-            <n-form-item label="当前应用规则">
-              <n-input
-                :value="currentApplyRuleName || '未指定，请先选择一条规则'"
-                readonly
-              />
-            </n-form-item>
+          <div class="rule-form__fields">
+            <div class="rule-form__field"><label>当前应用规则</label>
+              <Input :model-value="currentApplyRuleName || '未指定，请先选择一条规则'" readonly />
+            </div>
 
-            <n-form-item label="目录规则">
-              <n-select
-                v-model:value="quickApplyState.rule_id"
-                :options="ruleOptions"
-                :loading="loading"
-                :disabled="loading || ruleOptions.length === 0 || applyPending"
-                placeholder="选择要应用的目录规则"
-                @update:value="clearApplyResult"
-              />
+            <div class="rule-form__field"><label>目录规则</label>
+              <Select v-model="quickApplyState.rule_id" :disabled="loading || ruleOptions.length === 0 || applyPending">
+                <SelectTrigger>
+                  <SelectValue placeholder="选择要应用的目录规则" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="opt in ruleOptions" :key="opt.value" :value="String(opt.value)">{{ opt.label }}</SelectItem>
+                </SelectContent>
+              </Select>
               <div class="rule-field__hint">
                 <span>建议先在下方测试区验证命中效果，再应用到真实书籍。</span>
               </div>
-            </n-form-item>
+            </div>
 
-            <n-form-item label="目标书籍">
-              <n-select
-                v-model:value="quickApplyState.book_id"
-                :options="bookOptions"
-                :loading="booksLoading"
-                :disabled="booksLoading || bookOptions.length === 0 || applyPending"
-                placeholder="选择要重新解析目录的书"
-                @update:value="clearApplyResult"
-              />
-            </n-form-item>
+            <div class="rule-form__field"><label>目标书籍</label>
+              <Select v-model="quickApplyState.book_id" :disabled="booksLoading || bookOptions.length === 0 || applyPending">
+                <SelectTrigger>
+                  <SelectValue placeholder="选择要重新解析目录的书" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="opt in bookOptions" :key="opt.value" :value="String(opt.value)">{{ opt.label }}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div class="rule-apply__actions">
-              <n-button type="primary" :loading="applyPending" @click="runQuickApply">
+              <Button :disabled="applyPending" @click="runQuickApply">
                 应用规则并重解析
-              </n-button>
-              <n-button secondary :disabled="applyPending" @click="clearApplyResult">
+              </Button>
+              <Button variant="outline" :disabled="applyPending" @click="clearApplyResult">
                 清空结果
-              </n-button>
+              </Button>
             </div>
-          </n-form>
+          </div>
         </section>
 
         <section class="rule-apply__result">
-          <n-alert
-            v-if="booksError"
-            type="warning"
-            :show-icon="false"
-            class="rule-test__alert"
-          >
+          <Alert v-if="booksError" variant="warning" class="rule-test__alert">
             {{ booksError }}
-          </n-alert>
+          </Alert>
 
-          <n-alert
-            v-if="applyErrorMessage"
-            type="error"
-            :show-icon="false"
-            class="rule-test__alert"
-          >
+          <Alert v-if="applyErrorMessage" variant="destructive" class="rule-test__alert">
             {{ applyErrorMessage }}
-          </n-alert>
+          </Alert>
 
           <template v-if="applyResult">
             <div class="rule-apply__summary">
@@ -223,11 +279,10 @@
               </div>
             </div>
 
-            <n-empty
-              v-if="applyResult.chapters.length === 0"
-              description="这次重解析没有识别出目录，可先回到测试区继续调整规则。"
-              class="rule-test__empty"
-            />
+            <div v-if="applyResult.chapters.length === 0" class="rule-test__empty flex flex-col items-center justify-center py-8 text-gray-500">
+              <p>这次重解析没有识别出目录</p>
+              <p class="text-sm">可先回到测试区继续调整规则。</p>
+            </div>
 
             <template v-else>
               <div v-if="isMobileViewport" class="rule-mobile-result-list">
@@ -252,7 +307,7 @@
               </div>
 
               <div v-else class="rule-apply__table-wrap">
-                <n-table striped :single-line="false">
+                <table class="rule-result-table">
                   <thead>
                     <tr>
                       <th>chapter_index</th>
@@ -270,7 +325,7 @@
                       <td>{{ chapter.start_offset }} - {{ chapter.end_offset }}</td>
                     </tr>
                   </tbody>
-                </n-table>
+                </table>
               </div>
               <p class="rule-apply__note">
                 当前展示前 {{ applyPreviewChapters.length }} 条目录预览，完整目录可到书籍详情页继续查看。              </p>
@@ -283,15 +338,13 @@
           </div>
         </section>
       </div>
-    </n-card>
+    </div>
 
-    <n-card :bordered="false" class="rule-page__test-card">
-      <template #header>
+    <div class="rule-page__test-card">
+      <div class="rule-page__card-header">
         <span class="rule-page__card-title">规则测试与预览</span>
-      </template>
-      <template #header-extra>
         <span class="rule-page__card-subtitle">{{ testModeLabel }}</span>
-      </template>
+      </div>
 
       <div class="rule-test">
         <section class="rule-test__form">
@@ -300,106 +353,95 @@
             <p>先把某条规则带入测试区，再选择“书籍测试”或“原始文本片段测试”。</p>
           </div>
 
-          <n-form label-placement="top">
-            <n-form-item label="当前测试规则">
-              <n-input
-                :value="testState.loadedRuleName || '未指定，支持直接手动输入'"
-                readonly
-              />
-            </n-form-item>
+          <div class="rule-form__fields">
+            <div class="rule-form__field"><label>当前测试规则</label>
+              <Input :model-value="testState.loadedRuleName || '未指定，支持直接手动输入'" readonly />
+            </div>
 
-            <n-form-item label="regex_pattern">
-              <n-input
-                v-model:value="testState.regex_pattern"
-                type="textarea"
-                :autosize="{ minRows: 4, maxRows: 8 }"
+            <div class="rule-form__field"><label>regex_pattern</label>
+              <textarea
+                v-model="testState.regex_pattern"
+                rows="4"
                 placeholder="例如：^\s*第\s*\d+\s*[章节回].*$"
-              />
+                class="rule-form__textarea"
+              ></textarea>
               <div class="rule-field__hint">
                 <span>示例提示：</span>
-                <n-space size="small" wrap>
-                  <n-button
+                <div class="flex flex-wrap gap-2">
+                  <Button
                     v-for="example in regexExamples"
                     :key="example.label"
-                    size="tiny"
-                    tertiary
+                    size="sm"
+                    variant="ghost"
                     @click="applyExampleToTest(example)"
                   >
                     {{ example.label }}
-                  </n-button>
-                </n-space>
+                  </Button>
+                </div>
               </div>
-            </n-form-item>
+            </div>
 
-            <n-form-item label="Flags">
-              <n-input
-                v-model:value="testState.flags"
-                placeholder="例如：MULTILINE 或 IGNORECASE|MULTILINE"
-              />
-            </n-form-item>
+            <div class="rule-form__field"><label>Flags</label>
+              <Input v-model="testState.flags" placeholder="例如：MULTILINE 或 IGNORECASE|MULTILINE" />
+            </div>
 
-            <n-form-item label="测试方式">
-              <n-radio-group v-model:value="testState.mode">
-                <n-space wrap>
-                  <n-radio-button value="book">选择一本已上传的书</n-radio-button>
-                  <n-radio-button value="text">输入原始文本片段</n-radio-button>
-                </n-space>
-              </n-radio-group>
-            </n-form-item>
+            <div class="rule-form__field"><label>测试方式</label>
+              <div class="flex flex-wrap gap-2">
+              <label class="rule-form__radio" :class="{ 'rule-form__radio--active': testState.mode === 'book' }">
+                <input v-model="testState.mode" type="radio" value="book" class="sr-only" />
+                <span>选择一本已上传的书</span>
+              </label>
+              <label class="rule-form__radio" :class="{ 'rule-form__radio--active': testState.mode === 'text' }">
+                <input v-model="testState.mode" type="radio" value="text" class="sr-only" />
+                <span>输入原始文本片段</span>
+              </label>
+            </div>
+            </div>
 
-            <n-form-item v-if="testState.mode === 'book'" label="测试书籍">
-              <n-select
-                v-model:value="testState.book_id"
-                :options="bookOptions"
-                :loading="booksLoading"
-                :disabled="booksLoading || bookOptions.length === 0"
-                placeholder="选择一本已上传的书"
-              />
+            <div v-if="testState.mode === 'book'" class="rule-form__field"><label>测试书籍</label>
+              <Select v-model="testState.book_id" :disabled="booksLoading || bookOptions.length === 0">
+                <SelectTrigger>
+                  <SelectValue placeholder="选择一本已上传的书" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="opt in bookOptions" :key="opt.value" :value="String(opt.value)">{{ opt.label }}</SelectItem>
+                </SelectContent>
+              </Select>
               <div class="rule-field__hint">
                 <span>适合验证“整本书真实目录是否能被匹配出来”。</span>
               </div>
-            </n-form-item>
+            </div>
 
-            <n-form-item v-else label="原始文本片段">
-              <n-input
-                v-model:value="testState.text"
-                type="textarea"
-                :autosize="{ minRows: 8, maxRows: 14 }"
+            <div v-else class="rule-form__field"><label>原始文本片段</label>
+              <textarea
+                v-model="testState.text"
+                rows="8"
                 placeholder="粘贴一段章节标题附近的原始文本，例如：&#10;第1章 初始之夜&#10;风吹过旧城区……"
-              />
+                class="rule-form__textarea"
+              ></textarea>
               <div class="rule-field__hint">
                 <span>适合快速验证某个标题样式是否能命中，不必依赖整本书。</span>
               </div>
-            </n-form-item>
+            </div>
 
             <div class="rule-test__actions">
-              <n-button type="primary" :loading="testPending" @click="runRuleTest">
-                开始测试              </n-button>
-              <n-button secondary :disabled="testPending" @click="clearTestResult">
+              <Button :disabled="testPending" @click="runRuleTest">
+                开始测试              </Button>
+              <Button variant="outline" :disabled="testPending" @click="clearTestResult">
                 清空结果
-              </n-button>
+              </Button>
             </div>
-          </n-form>
+          </div>
         </section>
 
         <section class="rule-test__result">
-          <n-alert
-            v-if="booksError"
-            type="warning"
-            :show-icon="false"
-            class="rule-test__alert"
-          >
+          <Alert v-if="booksError" variant="warning" class="rule-test__alert">
             {{ booksError }}
-          </n-alert>
+          </Alert>
 
-          <n-alert
-            v-if="testErrorMessage"
-            type="error"
-            :show-icon="false"
-            class="rule-test__alert"
-          >
+          <Alert v-if="testErrorMessage" variant="destructive" class="rule-test__alert">
             {{ testErrorMessage }}
-          </n-alert>
+          </Alert>
 
           <template v-if="testResult">
             <div class="rule-test__summary">
@@ -417,11 +459,10 @@
               </div>
             </div>
 
-            <n-empty
-              v-if="testResult.items.length === 0"
-              description="这次测试没有找到匹配项，可以调整正则或 flags 后再试。"
-              class="rule-test__empty"
-            />
+            <div v-if="testResult.items.length === 0" class="rule-test__empty flex flex-col items-center justify-center py-8 text-gray-500">
+              <p>这次测试没有找到匹配项</p>
+              <p class="text-sm">可以调整正则或 flags 后再试。</p>
+            </div>
 
             <div v-else-if="isMobileViewport" class="rule-mobile-result-list">
               <article
@@ -445,7 +486,7 @@
             </div>
 
             <div v-else class="rule-test__table-wrap">
-              <n-table striped :single-line="false">
+              <table class="rule-result-table">
                 <thead>
                   <tr>
                     <th>匹配文本</th>
@@ -460,7 +501,7 @@
                     <td>{{ item.end }}</td>
                   </tr>
                 </tbody>
-              </n-table>
+              </table>
             </div>
           </template>
 
@@ -470,110 +511,98 @@
           </div>
         </section>
       </div>
-    </n-card>
+    </div>
 
-    <n-modal
-      v-model:show="modalVisible"
-      preset="card"
-      :mask-closable="!submitting"
-      :closable="!submitting"
-      :style="modalStyle"
-    >
-      <template #header>
-        <span>{{ modalTitle }}</span>
-      </template>
+    <Dialog :open="modalVisible" @update:open="modalVisible = $event">
+      <DialogContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{{ modalTitle }}</DialogTitle>
+        </DialogHeader>
 
       <div class="rule-form__intro">
         <p>自定义规则支持常见正则 flags，例如 <code>IGNORECASE|MULTILINE</code>。</p>
       </div>
 
-      <n-form label-placement="top">
-        <n-form-item label="规则名称">
-          <n-input
-            v-model:value="formModel.rule_name"
-            maxlength="100"
-            placeholder="例如：轻小说章节规则"
-          />
-        </n-form-item>
+      <div class="rule-form__fields">
+        <div class="rule-form__field"><label>规则名称</label>
+          <Input v-model="formModel.rule_name" maxlength="100" placeholder="例如：轻小说章节规则" />
+        </div>
 
-        <n-form-item label="正则表达式">
-          <n-input
-            v-model:value="formModel.regex_pattern"
-            type="textarea"
-            :autosize="{ minRows: 4, maxRows: 8 }"
+        <div class="rule-form__field"><label>正则表达式</label>
+          <textarea
+            v-model="formModel.regex_pattern"
+            rows="4"
             placeholder="例如：^\s*第\s*\d+\s*[章节回].*$"
-          />
+            class="rule-form__textarea"
+          ></textarea>
           <div class="rule-field__hint">
             <span>示例提示：</span>
-            <n-space size="small" wrap>
-              <n-button
+            <div class="flex flex-wrap gap-2">
+              <Button
                 v-for="example in regexExamples"
                 :key="`form-${example.label}`"
-                size="tiny"
-                tertiary
+                size="sm"
+                variant="ghost"
                 @click="applyExampleToForm(example)"
               >
                 {{ example.label }}
-              </n-button>
-            </n-space>
+              </Button>
+            </div>
           </div>
-        </n-form-item>
+        </div>
 
-        <n-form-item label="Flags">
-          <n-input
-            v-model:value="formModel.flags"
-            placeholder="例如：MULTILINE 或 IGNORECASE|MULTILINE"
-          />
-        </n-form-item>
+        <div class="rule-form__field"><label>Flags</label>
+          <Input v-model="formModel.flags" placeholder="例如：MULTILINE 或 IGNORECASE|MULTILINE" />
+        </div>
 
-        <n-form-item label="说明">
-          <n-input
-            v-model:value="formModel.description"
-            type="textarea"
-            :autosize="{ minRows: 3, maxRows: 6 }"
+        <div class="rule-form__field"><label>说明</label>
+          <textarea
+            v-model="formModel.description"
+            rows="3"
             placeholder="简要说明这个规则适合匹配什么样的章节标题"
-          />
-        </n-form-item>
+            class="rule-form__textarea"
+          ></textarea>
+        </div>
 
-        <n-form-item>
-          <n-checkbox v-model:checked="formModel.is_default">保存后设为默认规则</n-checkbox>
-        </n-form-item>
-      </n-form>
+        <div class="rule-form__field">
+          <label class="flex items-center gap-2 cursor-pointer">
+              <input v-model="formModel.is_default" type="checkbox" class="rule-form__checkbox" />
+              <span>保存后设为默认规则</span>
+            </label>
+        </div>
+      </div>
 
       <template #footer>
         <div class="rule-form__footer">
-          <n-button :disabled="submitting" @click="closeModal">取消</n-button>
-          <n-button type="primary" :loading="submitting" @click="submitForm">保存规则</n-button>
+          <Button variant="ghost" :disabled="submitting" @click="closeModal">取消</Button>
+          <Button :disabled="submitting" @click="submitForm">保存规则</Button>
         </div>
       </template>
-    </n-modal>
+    </DialogContent>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, h, onMounted, onUnmounted, reactive, ref } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
 import {
-  NAlert,
-  NButton,
-  NCard,
-  NCheckbox,
-  NDataTable,
-  NEmpty,
-  NForm,
-  NFormItem,
-  NInput,
-  NModal,
-  NPopconfirm,
-  NRadioButton,
-  NRadioGroup,
-  NSpace,
-  NSelect,
-  NTable,
-  NTag,
-  useMessage,
-  type DataTableColumns,
-  type PaginationProps,
-} from "naive-ui";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { notify } from "@/utils/notify";
 
 import { booksApi } from "../api/books";
 import { chapterRulesApi } from "../api/chapter-rules";
@@ -633,7 +662,7 @@ const regexExamples: RegexExample[] = [
   },
 ];
 
-const message = useMessage();
+
 const rules = ref<ChapterRule[]>([]);
 const books = ref<BookShelfItem[]>([]);
 const loading = ref(false);
@@ -664,13 +693,21 @@ const quickApplyState = reactive<QuickApplyState>({
   book_id: null,
 });
 
-const pagination: PaginationProps = {
-  pageSize: 8,
-};
+const pageSize = 8;
+const currentPage = ref(1);
 
-const modalStyle = {
-  width: "min(760px, calc(100vw - 24px))",
-};
+const paginatedRules = computed(() => {
+  const start = (currentPage.value - 1) * pageSize;
+  return rules.value.slice(start, start + pageSize);
+});
+
+const totalPages = computed(() => Math.ceil(rules.value.length / pageSize));
+
+function goToPage(page: number) {
+  currentPage.value = Math.min(Math.max(page, 1), totalPages.value);
+}
+
+
 
 const builtInRules = computed(() => rules.value.filter((rule) => rule.is_builtin));
 const customRules = computed(() => rules.value.filter((rule) => !rule.is_builtin));
@@ -723,10 +760,6 @@ function resetForm() {
   Object.assign(formModel, createEmptyForm());
 }
 
-function rowKey(row: ChapterRule) {
-  return row.id;
-}
-
 function getFallbackRule() {
   return rules.value.find((rule) => rule.is_default) || rules.value[0] || null;
 }
@@ -770,7 +803,7 @@ function loadRuleIntoTest(rule: ChapterRule, shouldNotify = true) {
   clearTestResult();
 
   if (shouldNotify) {
-    message.success(`已将“${rule.rule_name}”带入测试区`);
+    notify.success(`已将“${rule.rule_name}”带入测试区`);
   }
 }
 
@@ -779,7 +812,7 @@ function loadRuleIntoApply(rule: ChapterRule, shouldNotify = true) {
   clearApplyResult();
 
   if (shouldNotify) {
-    message.success(`已选中“${rule.rule_name}”，现在可以直接应用到书籍`);
+    notify.success(`已选中“${rule.rule_name}”，现在可以直接应用到书籍`);
   }
 }
 
@@ -839,6 +872,7 @@ function closeModal() {
 }
 
 async function loadRules() {
+  currentPage.value = 1;
   loading.value = true;
   pageError.value = null;
 
@@ -889,12 +923,12 @@ async function submitForm() {
   const regexPattern = formModel.regex_pattern.trim();
 
   if (!ruleName) {
-    message.warning("请先填写规则名称");
+    notify.info("请先填写规则名称");
     return;
   }
 
   if (!regexPattern) {
-    message.warning("请先填写正则表达式");
+    notify.info("请先填写正则表达式");
     return;
   }
 
@@ -911,16 +945,16 @@ async function submitForm() {
 
     if (editingRuleId.value) {
       await chapterRulesApi.update(editingRuleId.value, payload);
-      message.success("规则已更新");
+      notify.success("规则已更新");
     } else {
       await chapterRulesApi.create(payload);
-      message.success("规则已创建");
+      notify.success("规则已创建");
     }
 
     closeModal();
     await loadRules();
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   } finally {
     submitting.value = false;
   }
@@ -933,20 +967,32 @@ async function handleSetDefault(rule: ChapterRule) {
 
   try {
     await chapterRulesApi.update(rule.id, { is_default: true });
-    message.success(`已将“${rule.rule_name}”设为默认规则`);
+    notify.success(`已将“${rule.rule_name}”设为默认规则`);
     await loadRules();
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
+  }
+}
+
+function confirmDeleteTable(rule: ChapterRule) {
+  if (confirm(`删除后无法恢复，确认删除「${rule.rule_name}」吗？`)) {
+    void handleDelete(rule);
+  }
+}
+
+function confirmDelete(rule: ChapterRule) {
+  if (confirm(`删除后无法恢复，确认删除「${rule.rule_name}」吗？`)) {
+    void handleDelete(rule);
   }
 }
 
 async function handleDelete(rule: ChapterRule) {
   try {
     await chapterRulesApi.remove(rule.id);
-    message.success(`已删除“${rule.rule_name}”`);
+    notify.success(`已删除“${rule.rule_name}”`);
     await loadRules();
   } catch (error) {
-    message.error(getErrorMessage(error));
+    notify.error(getErrorMessage(error));
   }
 }
 
@@ -1032,7 +1078,7 @@ async function runRuleTest() {
           },
     );
 
-    message.success("规则测试已完成");
+    notify.success("规则测试已完成");
   } catch (error) {
     testErrorMessage.value = getFriendlyTestError(error);
   } finally {
@@ -1061,106 +1107,13 @@ async function runQuickApply() {
     const bookTitle = books.value.find((book) => book.id === quickApplyState.book_id)?.title || "目标书籍";
     const ruleName = rules.value.find((rule) => rule.id === quickApplyState.rule_id)?.rule_name || "目录规则";
 
-    message.success(`已将“${ruleName}”应用到《${bookTitle}》，共识别 ${applyResult.value.total_chapters} 个章节`);
+    notify.success(`已将“${ruleName}”应用到《${bookTitle}》，共识别 ${applyResult.value.total_chapters} 个章节`);
   } catch (error) {
     applyErrorMessage.value = getFriendlyApplyError(error);
   } finally {
     applyPending.value = false;
   }
 }
-
-const columns = computed<DataTableColumns<ChapterRule>>(() => [
-  {
-    title: "规则信息",
-    key: "rule_name",
-    minWidth: 220,
-    render: (row) => h("div", { class: "rule-table__primary" }, [
-      h("strong", { class: "rule-table__title" }, row.rule_name),
-      h("div", { class: "rule-table__badges" }, [
-        h(NTag, {
-          size: "small",
-          round: true,
-          bordered: false,
-          type: row.is_builtin ? "warning" : "info",
-        }, { default: () => row.is_builtin ? "内置" : "自定义" }),
-        row.is_default
-          ? h(NTag, {
-              size: "small",
-              round: true,
-              bordered: false,
-              type: "success",
-            }, { default: () => "当前默认" })
-          : null,
-      ]),
-    ]),
-  },
-  {
-    title: "正则表达式",
-    key: "regex_pattern",
-    minWidth: 260,
-    render: (row) => h("code", { class: "rule-table__code" }, row.regex_pattern),
-  },
-  {
-    title: "Flags / 说明",
-    key: "flags",
-    minWidth: 220,
-    render: (row) => h("div", { class: "rule-table__secondary" }, [
-      h("div", { class: "rule-table__flags" }, row.flags || "无 flags"),
-      h("p", { class: "rule-table__description" }, row.description || "暂无说明"),
-    ]),
-  },
-  {
-    title: "更新时间",
-    key: "updated_at",
-    width: 160,
-    render: (row) => h("span", { class: "rule-table__time" }, formatDate(row.updated_at)),
-  },
-  {
-    title: "操作",
-    key: "actions",
-    width: 420,
-    render: (row) => h(NSpace, { size: 8, wrap: true }, {
-      default: () => [
-        h(NButton, {
-          size: "small",
-          secondary: true,
-          onClick: () => loadRuleIntoTest(row),
-        }, { default: () => "带入测试" }),
-        h(NButton, {
-          size: "small",
-          tertiary: true,
-          onClick: () => loadRuleIntoApply(row),
-        }, { default: () => "应用到书" }),
-        h(NButton, {
-          size: "small",
-          secondary: !row.is_default,
-          type: row.is_default ? "success" : "primary",
-          disabled: row.is_default,
-          onClick: () => { void handleSetDefault(row); },
-        }, { default: () => row.is_default ? "默认中" : "设为默认" }),
-        row.is_builtin
-          ? null
-          : h(NButton, {
-              size: "small",
-              tertiary: true,
-              onClick: () => openEditModal(row),
-            }, { default: () => "编辑" }),
-        row.is_builtin
-          ? null
-          : h(NPopconfirm, {
-              onPositiveClick: () => { void handleDelete(row); },
-            }, {
-              trigger: () => h(NButton, {
-                size: "small",
-                tertiary: true,
-                type: "error",
-              }, { default: () => "删除" }),
-              default: () => "删除后无法恢复，确认继续吗？",
-            }),
-      ],
-    }),
-  },
-]);
 
 onMounted(() => {
   if (typeof window !== "undefined") {
@@ -1324,10 +1277,6 @@ onUnmounted(() => {
   flex-wrap: wrap;
 }
 
-.rule-page__toolbar-actions :deep(.n-button) {
-  border-radius: var(--radius-md);
-}
-
 .rule-page__alert,
 .rule-test__alert {
   border-radius: 18px;
@@ -1340,12 +1289,6 @@ onUnmounted(() => {
   border-radius: var(--radius-xl);
   background: var(--surface-raised);
   box-shadow: var(--shadow-soft);
-}
-
-.rule-page__table-card :deep(.n-card-header),
-.rule-page__apply-card :deep(.n-card-header),
-.rule-page__test-card :deep(.n-card-header) {
-  align-items: center;
 }
 
 .rule-page__card-title {
@@ -1611,17 +1554,6 @@ onUnmounted(() => {
   padding: 18px 0 4px;
 }
 
-.rule-page :deep(.n-base-selection),
-.rule-page :deep(.n-input),
-.rule-page :deep(.n-input-wrapper),
-.rule-page :deep(.n-form-item),
-.rule-page :deep(textarea) {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
 @media (max-width: 960px) {
   .rule-page__hero,
   .rule-test,
@@ -1717,6 +1649,158 @@ onUnmounted(() => {
     display: none;
   }
 }
+
+.rule-page__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color-soft);
+}
+
+.rule-form__fields {
+  display: grid;
+  gap: 16px;
+}
+
+.rule-form__field {
+  display: grid;
+  gap: 8px;
+}
+
+.rule-form__field label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rule-form__textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color-soft);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  transition: border-color 160ms ease;
+}
+
+.rule-form__textarea:focus {
+  border-color: var(--accent-color);
+}
+
+.rule-form__checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.rule-form__radio {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border: 1px solid var(--border-color-soft);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.rule-form__radio:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.rule-form__radio--active {
+  border-color: var(--primary-color);
+  background: rgba(244, 164, 180, 0.12);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.rule-form__radio input {
+  position: absolute;
+  opacity: 0;
+}
+
+.rule-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border-color-soft);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.rule-table th,
+.rule-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color-soft);
+  vertical-align: top;
+}
+
+.rule-table th {
+  background: var(--surface-soft, rgba(255, 245, 247, 0.56));
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.rule-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.rule-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rule-table__pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px;
+}
+
+.rule-table__page-info {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.rule-result-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border-color-soft);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.rule-result-table th,
+.rule-result-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color-soft);
+}
+
+.rule-result-table th {
+  background: var(--surface-soft, rgba(255, 245, 247, 0.56));
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.rule-result-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 </style>
 
 
