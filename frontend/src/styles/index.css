@@ -16,42 +16,42 @@
     serif;
   /* 蓝粉二次元浅色背景：天空蓝到樱花粉渐变 */
   --app-background:
-    linear-gradient(180deg, #E8F4FC 0%, #F5EBF2 100%);
-  --app-shell-color: #F5EBF2;
+    linear-gradient(180deg, #D6ECFA 0%, #F0DEE8 100%);
+  --app-shell-color: #F0DEE8;
   /* 表面色：纯白与极淡蓝，保持干净清爽 */
   --surface-color: #FFFFFF;
-  --surface-shadow: 0 18px 48px rgba(107, 181, 232, 0.12);
-  --surface-raised: color-mix(in srgb, var(--surface-color) 96%, #6BB5E8 4%);
-  --surface-soft: color-mix(in srgb, var(--surface-color) 90%, #E8F4FC 10%);
+  --surface-shadow: 0 18px 48px rgba(74, 159, 217, 0.14);
+  --surface-raised: color-mix(in srgb, var(--surface-color) 96%, #4A9FD9 4%);
+  --surface-soft: color-mix(in srgb, var(--surface-color) 90%, #D6ECFA 10%);
   --surface-header-bg: rgba(255, 255, 255, 0.88);
   --surface-panel-bg: rgba(255, 255, 255, 0.72);
-  --surface-panel-soft-bg: rgba(232, 244, 252, 0.56);
+  --surface-panel-soft-bg: rgba(214, 236, 250, 0.56);
   --surface-card-bg: #FFFFFF;
-  --surface-input-bg: rgba(232, 244, 252, 0.68);
-  --surface-empty-bg: rgba(232, 244, 252, 0.78);
-  --surface-stat-bg: rgba(232, 244, 252, 0.64);
+  --surface-input-bg: rgba(214, 236, 250, 0.68);
+  --surface-empty-bg: rgba(214, 236, 250, 0.78);
+  --surface-stat-bg: rgba(214, 236, 250, 0.64);
   --surface-mobile-card-bg: rgba(255, 255, 255, 0.58);
-  --surface-intro-bg: rgba(232, 244, 252, 0.6);
-  --surface-test-bg: rgba(232, 244, 252, 0.52);
-  --surface-tab-hover-bg: rgba(107, 181, 232, 0.1);
+  --surface-intro-bg: rgba(214, 236, 250, 0.6);
+  --surface-test-bg: rgba(214, 236, 250, 0.52);
+  --surface-tab-hover-bg: rgba(74, 159, 217, 0.1);
   --surface-tab-active-bg: rgba(255, 255, 255, 0.9);
-  --surface-tab-active-border: rgba(107, 181, 232, 0.3);
-  --surface-cover-bg: linear-gradient(180deg, #F8FCFF 0%, #E8F0F5 100%);
+  --surface-tab-active-border: rgba(74, 159, 217, 0.3);
+  --surface-cover-bg: linear-gradient(180deg, #F0F8FF 0%, #E0E8F0 100%);
   --surface-cover-fill-bg: rgba(255, 255, 255, 0.72);
   --surface-cover-loading-bg: rgba(255, 255, 255, 0.82);
-  --surface-code-bg: rgba(107, 181, 232, 0.08);
+  --surface-code-bg: rgba(74, 159, 217, 0.08);
   /* 二次元主色调：天空蓝 + 樱花粉强调色 */
-  --primary-color: #6BB5E8;
-  --primary-soft: rgba(107, 181, 232, 0.18);
+  --primary-color: #4A9FD9;
+  --primary-soft: rgba(74, 159, 217, 0.18);
   --accent-color: #F4A4B4;
   --text-primary: #2D3A4A;
   --text-secondary: #5A6A7A;
-  --border-color: rgba(107, 181, 232, 0.32);
-  --border-color-soft: rgba(107, 181, 232, 0.18);
+  --border-color: rgba(74, 159, 217, 0.32);
+  --border-color-soft: rgba(74, 159, 217, 0.18);
   /* 阴影基调改为带蓝色调的弥散阴影 */
-  --shadow-soft: 0 12px 30px rgba(107, 181, 232, 0.10);
-  --shadow-card: 0 16px 40px rgba(107, 181, 232, 0.15);
-  --shadow-modal: 0 24px 60px rgba(107, 181, 232, 0.12);
+  --shadow-soft: 0 12px 30px rgba(74, 159, 217, 0.14);
+  --shadow-card: 0 16px 40px rgba(74, 159, 217, 0.18);
+  --shadow-modal: 0 24px 60px rgba(74, 159, 217, 0.14);
   /* 圆角系统：二次元风格使用更圆润的大圆角 */
   --radius-sm: 10px;
   --radius-md: 16px;
@@ -70,46 +70,46 @@
   --text-body: 16px;
   --text-caption: 13px;
   /* 按钮颜色 */
-  --button-default-bg: #6BB5E8;
+  --button-default-bg: #4A9FD9;
   --button-default-text: #ffffff;
-  --button-default-hover: #5AA8DE;
+  --button-default-hover: #3B8FD4;
   --button-destructive-bg: #dc2626;
   --button-destructive-hover: #b91c1c;
-  --button-secondary-bg: #EDF5FC;
+  --button-secondary-bg: #E0EFF8;
   --button-secondary-text: #2D3A4A;
-  --button-secondary-hover: #E0EEF8;
-  --button-secondary-border: rgba(107, 181, 232, 0.25);
+  --button-secondary-hover: #D0E6F4;
+  --button-secondary-border: rgba(74, 159, 217, 0.25);
   --button-ghost-text: #2D3A4A;
-  --button-ghost-hover: #EDF5FC;
-  --button-outline-border: #C8DFF0;
+  --button-ghost-hover: #E0EFF8;
+  --button-outline-border: #B0D4EC;
   --button-outline-bg: #ffffff;
   --button-outline-text: #2D3A4A;
-  --button-outline-hover: #F0F7FC;
+  --button-outline-hover: #DDEEF8;
   --button-link-text: #2D3A4A;
   --button-link-bg: transparent;
   --button-link-hover-bg: transparent;
   /* Badge 颜色 */
-  --badge-default-bg: #6BB5E8;
+  --badge-default-bg: #4A9FD9;
   --badge-default-text: #ffffff;
-  --badge-default-hover: #5AA8DE;
-  --badge-secondary-bg: #EDF5FC;
+  --badge-default-hover: #3B8FD4;
+  --badge-secondary-bg: #E0EFF8;
   --badge-secondary-text: #2D3A4A;
-  --badge-secondary-hover: #E0EEF8;
+  --badge-secondary-hover: #D0E6F4;
   --badge-destructive-bg: #fee2e2;
   --badge-destructive-text: #b91c1c;
   --badge-destructive-hover: #fecaca;
   --badge-outline-text: #2D3A4A;
-  --badge-outline-border: #C8DFF0;
+  --badge-outline-border: #B0D4EC;
   /* Alert 颜色 */
-  --alert-default-bg: #F0F7FC;
+  --alert-default-bg: #DDEEF8;
   --alert-default-text: #2D3A4A;
-  --alert-default-border: #C8DFF0;
+  --alert-default-border: #B0D4EC;
   --alert-destructive-bg: #fef2f2;
   --alert-destructive-text: #b91c1c;
   --alert-destructive-border: #fecaca;
-  --alert-info-bg: #E8F4FC;
-  --alert-info-text: #3B82C0;
-  --alert-info-border: #A0D0F0;
+  --alert-info-bg: #D6ECFA;
+  --alert-info-text: #2B7FC4;
+  --alert-info-border: #8CC4E8;
   --alert-warning-bg: #fffbeb;
   --alert-warning-text: #b45309;
   --alert-warning-border: #fde68a;
@@ -117,19 +117,19 @@
   --alert-success-text: #15803d;
   --alert-success-border: #bbf7d0;
   /* Slider 颜色 */
-  --slider-track-bg: rgba(107, 181, 232, 0.30);
-  --slider-range-bg: #6BB5E8;
+  --slider-track-bg: rgba(74, 159, 217, 0.30);
+  --slider-range-bg: #4A9FD9;
   --slider-thumb-bg: #ffffff;
-  --slider-thumb-border: #C8DFF0;
+  --slider-thumb-border: #B0D4EC;
   /* Dialog 颜色 */
   --dialog-bg: #ffffff;
-  --dialog-border: #C8DFF0;
+  --dialog-border: #B0D4EC;
   /* Select 颜色 */
-  --select-trigger-border: #C8DFF0;
+  --select-trigger-border: #B0D4EC;
   --select-content-bg: #ffffff;
-  --select-content-border: #C8DFF0;
+  --select-content-border: #B0D4EC;
   --select-content-text: #2D3A4A;
-  --select-item-focus-bg: #EDF5FC;
+  --select-item-focus-bg: #E0EFF8;
   --select-item-focus-text: #2D3A4A;
 }
 
@@ -199,7 +199,7 @@ body.app-theme--dark {
   --badge-secondary-bg: rgba(255, 255, 255, 0.08);
   --badge-secondary-text: var(--text-primary);
   --badge-secondary-hover: rgba(255, 255, 255, 0.13);
-  --badge-destructive-bg: rgba(239, 68, 68, 0.15);
+  --badge-destructive-bg: rgba(239, 68, 68, 0.18);
   --badge-destructive-text: #fca5a5;
   --badge-destructive-hover: rgba(239, 68, 68, 0.22);
   --badge-outline-text: var(--text-primary);
@@ -208,16 +208,16 @@ body.app-theme--dark {
   --alert-default-bg: rgba(255, 255, 255, 0.05);
   --alert-default-text: var(--text-primary);
   --alert-default-border: rgba(255, 255, 255, 0.08);
-  --alert-destructive-bg: rgba(239, 68, 68, 0.12);
+  --alert-destructive-bg: rgba(239, 68, 68, 0.14);
   --alert-destructive-text: #fca5a5;
   --alert-destructive-border: rgba(239, 68, 68, 0.25);
-  --alert-info-bg: rgba(59, 130, 246, 0.12);
+  --alert-info-bg: rgba(59, 130, 246, 0.14);
   --alert-info-text: #93c5fd;
   --alert-info-border: rgba(59, 130, 246, 0.25);
-  --alert-warning-bg: rgba(245, 158, 11, 0.12);
+  --alert-warning-bg: rgba(245, 158, 11, 0.14);
   --alert-warning-text: #fcd34d;
   --alert-warning-border: rgba(245, 158, 11, 0.25);
-  --alert-success-bg: rgba(34, 197, 94, 0.12);
+  --alert-success-bg: rgba(34, 197, 94, 0.14);
   --alert-success-text: #86efac;
   --alert-success-border: rgba(34, 197, 94, 0.25);
   /* Slider 暗色模式 */
@@ -280,7 +280,7 @@ a {
 
 /* 文本选中文本的背景色：使用主题蓝的半透明版本 */
 ::selection {
-  background: rgba(107, 181, 232, 0.28);
+  background: rgba(74, 159, 217, 0.28);
 }
 
 body.app-theme--dark ::selection {

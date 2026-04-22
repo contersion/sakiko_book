@@ -199,7 +199,7 @@ function confirmDelete(groupId: number, groupName: string) {
   display: grid;
   gap: 14px;
   padding: 16px 18px;
-  border: 1px solid rgba(107, 181, 232, 0.1);
+  border: 1px solid rgba(74, 159, 217, 0.1);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.64);
 }

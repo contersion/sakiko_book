@@ -626,7 +626,7 @@ onUnmounted(() => {
   border-radius: var(--radius-xl);
   /* 二次元风格工具栏背景：淡蓝粉光晕 + 奶白表面色 */
   background:
-    radial-gradient(circle at top right, rgba(107, 181, 232, 0.1), transparent 28%),
+    radial-gradient(circle at top right, rgba(74, 159, 217, 0.1), transparent 28%),
     radial-gradient(circle at bottom left, rgba(244, 164, 180, 0.1), transparent 34%),
     var(--surface-raised);
   box-shadow: var(--shadow-soft);
@@ -766,16 +766,16 @@ onUnmounted(() => {
 
 .bookshelf-page__tab:hover {
   color: var(--text-primary);
-  background: rgba(107, 181, 232, 0.1);
+  background: rgba(74, 159, 217, 0.1);
 }
 
 .bookshelf-page__tab--active {
   color: var(--primary-color);
   background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(107, 181, 232, 0.35);
+  border-color: rgba(74, 159, 217, 0.35);
   box-shadow:
-    inset 0 0 0 1px rgba(107, 181, 232, 0.1),
-    0 6px 14px rgba(107, 181, 232, 0.1);
+    inset 0 0 0 1px rgba(74, 159, 217, 0.1),
+    0 6px 14px rgba(74, 159, 217, 0.1);
 }
 
 .bookshelf-page__filter-actions {
@@ -827,7 +827,7 @@ onUnmounted(() => {
 
 .bookshelf-page__empty {
   padding: 52px 24px;
-  border: 1px solid rgba(107, 181, 232, 0.18);
+  border: 1px solid rgba(74, 159, 217, 0.18);
   border-radius: 22px;
   background: rgba(232, 244, 252, 0.78);
 }
@@ -869,7 +869,7 @@ onUnmounted(() => {
 
 .bookshelf-item:hover {
   transform: translateY(-4px);
-  border-color: rgba(107, 181, 232, 0.35);
+  border-color: rgba(74, 159, 217, 0.35);
   box-shadow: var(--shadow-card);
 }
 
@@ -886,10 +886,10 @@ onUnmounted(() => {
   width: 68px;
   min-height: 94px;
   padding: 10px 8px;
-  border: 1px solid rgba(107, 181, 232, 0.22);
+  border: 1px solid rgba(74, 159, 217, 0.22);
   border-radius: 14px;
   /* 二次元 pastel 蓝白渐变封面背景 */
-  background: linear-gradient(180deg, #F8FCFF 0%, #E8F0F5 100%);
+  background: linear-gradient(180deg, #F0F8FF 0%, #E0E8F0 100%);
   color: var(--text-secondary);
   overflow: hidden;
 }
@@ -967,7 +967,7 @@ onUnmounted(() => {
   margin-top: 2px;
   padding: 3px 9px;
   border-radius: 999px;
-  background: rgba(107, 181, 232, 0.15);
+  background: rgba(74, 159, 217, 0.15);
   color: var(--primary-color);
   font-size: 12px;
   font-weight: 600;
@@ -1164,7 +1164,7 @@ onUnmounted(() => {
   width: 100%;
   height: 6px;
   border-radius: 999px;
-  background: rgba(107, 181, 232, 0.18);
+  background: rgba(74, 159, 217, 0.18);
   overflow: hidden;
 }
 
