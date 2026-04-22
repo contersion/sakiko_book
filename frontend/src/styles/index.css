@@ -71,6 +71,25 @@
   --text-title-2: clamp(24px, 3vw, 34px);
   --text-body: 16px;
   --text-caption: 13px;
+  /* 按钮颜色 */
+  --button-default-bg: #111827;
+  --button-default-text: #ffffff;
+  --button-default-hover: #1f2937;
+  --button-destructive-bg: #dc2626;
+  --button-destructive-hover: #b91c1c;
+  --button-secondary-bg: #f3f4f6;
+  --button-secondary-text: #111827;
+  --button-secondary-hover: #e5e7eb;
+  --button-secondary-border: transparent;
+  --button-ghost-text: #111827;
+  --button-ghost-hover: #f3f4f6;
+  --button-outline-border: #e5e7eb;
+  --button-outline-bg: #ffffff;
+  --button-outline-text: #111827;
+  --button-outline-hover: #f9fafb;
+  --button-link-text: #111827;
+  --button-link-bg: transparent;
+  --button-link-hover-bg: transparent;
 }
 
 body.app-theme--dark {
@@ -113,6 +132,25 @@ body.app-theme--dark {
   --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.35);
   --shadow-card: 0 16px 36px rgba(0, 0, 0, 0.42);
   --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.5);
+  /* 按钮暗色模式 */
+  --button-default-bg: var(--primary-color);
+  --button-default-text: var(--app-shell-color);
+  --button-default-hover: #ff9eb8;
+  --button-destructive-bg: #ef4444;
+  --button-destructive-hover: #dc2626;
+  --button-secondary-bg: rgba(255, 255, 255, 0.06);
+  --button-secondary-text: var(--text-primary);
+  --button-secondary-hover: rgba(255, 255, 255, 0.11);
+  --button-secondary-border: rgba(255, 255, 255, 0.08);
+  --button-ghost-text: var(--text-secondary);
+  --button-ghost-hover: rgba(255, 255, 255, 0.06);
+  --button-outline-border: rgba(255, 143, 171, 0.22);
+  --button-outline-bg: transparent;
+  --button-outline-text: var(--text-primary);
+  --button-outline-hover: rgba(255, 143, 171, 0.08);
+  --button-link-text: var(--primary-color);
+  --button-link-bg: rgba(255, 143, 171, 0.08);
+  --button-link-hover-bg: rgba(255, 143, 171, 0.14);
 }
 
 body.app-theme--light {

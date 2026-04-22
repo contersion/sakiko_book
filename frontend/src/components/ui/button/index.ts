@@ -7,12 +7,12 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-gray-900 text-white hover:bg-gray-800",
-        destructive: "bg-red-600 text-white hover:bg-red-700",
-        outline: "border border-gray-200 bg-white hover:bg-gray-100 text-gray-900",
-        secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
-        ghost: "hover:bg-gray-100 text-gray-900",
-        link: "text-gray-900 underline-offset-4 hover:underline",
+        default: "bg-[var(--button-default-bg)] text-[var(--button-default-text)] hover:bg-[var(--button-default-hover)]",
+        destructive: "bg-[var(--button-destructive-bg)] text-white hover:bg-[var(--button-destructive-hover)]",
+        outline: "border border-[var(--button-outline-border)] bg-[var(--button-outline-bg)] text-[var(--button-outline-text)] hover:bg-[var(--button-outline-hover)]",
+        secondary: "bg-[var(--button-secondary-bg)] text-[var(--button-secondary-text)] hover:bg-[var(--button-secondary-hover)] border border-[var(--button-secondary-border)]",
+        ghost: "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover)] hover:text-[var(--text-primary)]",
+        link: "text-[var(--button-link-text)] bg-[var(--button-link-bg)] hover:bg-[var(--button-link-hover-bg)] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2",
