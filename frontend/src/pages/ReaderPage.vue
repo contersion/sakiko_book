@@ -65,6 +65,10 @@
           </div>
 
           <div class="reader-rail__actions">
+            <button type="button" class="reader-rail__action" @click.stop="goToBookshelf">
+              <strong>返回书架</strong>
+              <span>回到我的书架</span>
+            </button>
             <button type="button" class="reader-rail__action" @click.stop="goBack">
               <strong>返回详情</strong>
               <span>回到书籍信息与目录入口</span>
@@ -182,7 +186,6 @@
           <div class="reader-float__summary">
             <span>{{ currentChapterPositionLabel }}</span>
             <span>{{ syncStatusTagLabel }}</span>
-            <span>{{ syncedProgressLabel }}</span>
           </div>
 
           <div class="reader-float__actions">
@@ -1328,6 +1331,10 @@ function goBack() {
     params: { bookId: props.bookId },
   });
 }
+
+function goToBookshelf() {
+  void router.push({ name: "books" });
+}
 </script>
 
 <style scoped>
@@ -1403,6 +1410,14 @@ function goBack() {
   --reader-action-hover: rgba(255, 255, 255, 0.08);
   --reader-settings-bg: rgba(255, 143, 171, 0.04);
   --reader-settings-border: rgba(255, 143, 171, 0.1);
+}
+
+.reader-page--dark .reader-progress-bar {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.reader-page--dark .reader-progress-bar__fill {
+  background: #ffffff;
 }
 
 .reader-page--dark .reader-glass {
