@@ -14,44 +14,44 @@
     "Times New Roman",
     "STSong",
     serif;
-  /* 粉白二次元浅色背景：樱花牛奶渐变 */
+  /* 蓝粉二次元浅色背景：天空蓝到樱花粉渐变 */
   --app-background:
-    linear-gradient(180deg, #FFF5F7 0%, #FFF0F3 100%);
-  --app-shell-color: #FFF0F3;
-  /* 表面色：纯白与极淡粉，保持干净清爽 */
+    linear-gradient(180deg, #E8F4FC 0%, #F5EBF2 100%);
+  --app-shell-color: #F5EBF2;
+  /* 表面色：纯白与极淡蓝，保持干净清爽 */
   --surface-color: #FFFFFF;
-  --surface-shadow: 0 18px 48px rgba(244, 164, 180, 0.12);
-  --surface-raised: color-mix(in srgb, var(--surface-color) 96%, #F4A4B4 4%);
-  --surface-soft: color-mix(in srgb, var(--surface-color) 90%, #FFF0F3 10%);
+  --surface-shadow: 0 18px 48px rgba(107, 181, 232, 0.12);
+  --surface-raised: color-mix(in srgb, var(--surface-color) 96%, #6BB5E8 4%);
+  --surface-soft: color-mix(in srgb, var(--surface-color) 90%, #E8F4FC 10%);
   --surface-header-bg: rgba(255, 255, 255, 0.88);
   --surface-panel-bg: rgba(255, 255, 255, 0.72);
-  --surface-panel-soft-bg: rgba(255, 245, 247, 0.56);
+  --surface-panel-soft-bg: rgba(232, 244, 252, 0.56);
   --surface-card-bg: #FFFFFF;
-  --surface-input-bg: rgba(255, 245, 247, 0.68);
-  --surface-empty-bg: rgba(255, 245, 247, 0.78);
-  --surface-stat-bg: rgba(255, 240, 243, 0.64);
+  --surface-input-bg: rgba(232, 244, 252, 0.68);
+  --surface-empty-bg: rgba(232, 244, 252, 0.78);
+  --surface-stat-bg: rgba(232, 244, 252, 0.64);
   --surface-mobile-card-bg: rgba(255, 255, 255, 0.58);
-  --surface-intro-bg: rgba(255, 245, 247, 0.6);
-  --surface-test-bg: rgba(255, 245, 247, 0.52);
-  --surface-tab-hover-bg: rgba(244, 164, 180, 0.1);
+  --surface-intro-bg: rgba(232, 244, 252, 0.6);
+  --surface-test-bg: rgba(232, 244, 252, 0.52);
+  --surface-tab-hover-bg: rgba(107, 181, 232, 0.1);
   --surface-tab-active-bg: rgba(255, 255, 255, 0.9);
-  --surface-tab-active-border: rgba(244, 164, 180, 0.3);
-  --surface-cover-bg: linear-gradient(180deg, #FFFDFE 0%, #F5E8EC 100%);
+  --surface-tab-active-border: rgba(107, 181, 232, 0.3);
+  --surface-cover-bg: linear-gradient(180deg, #F8FCFF 0%, #E8F0F5 100%);
   --surface-cover-fill-bg: rgba(255, 255, 255, 0.72);
   --surface-cover-loading-bg: rgba(255, 255, 255, 0.82);
-  --surface-code-bg: rgba(244, 164, 180, 0.08);
-  /* 二次元主色调：樱花粉 + 薰衣草紫强调色 */
-  --primary-color: #F4A4B4;
-  --primary-soft: rgba(244, 164, 180, 0.18);
-  --accent-color: #C9B1FF;
-  --text-primary: #2D2D2D;
-  --text-secondary: #5A5A5A;
-  --border-color: rgba(244, 164, 180, 0.32);
-  --border-color-soft: rgba(244, 164, 180, 0.18);
-  /* 阴影基调改为带粉色调的弥散阴影 */
-  --shadow-soft: 0 12px 30px rgba(244, 164, 180, 0.1);
-  --shadow-card: 0 16px 40px rgba(244, 164, 180, 0.20);
-  --shadow-modal: 0 24px 60px rgba(244, 164, 180, 0.16);
+  --surface-code-bg: rgba(107, 181, 232, 0.08);
+  /* 二次元主色调：天空蓝 + 樱花粉强调色 */
+  --primary-color: #6BB5E8;
+  --primary-soft: rgba(107, 181, 232, 0.18);
+  --accent-color: #F4A4B4;
+  --text-primary: #2D3A4A;
+  --text-secondary: #5A6A7A;
+  --border-color: rgba(107, 181, 232, 0.32);
+  --border-color-soft: rgba(107, 181, 232, 0.18);
+  /* 阴影基调改为带蓝色调的弥散阴影 */
+  --shadow-soft: 0 12px 30px rgba(107, 181, 232, 0.10);
+  --shadow-card: 0 16px 40px rgba(107, 181, 232, 0.15);
+  --shadow-modal: 0 24px 60px rgba(107, 181, 232, 0.12);
   /* 圆角系统：二次元风格使用更圆润的大圆角 */
   --radius-sm: 10px;
   --radius-md: 16px;
@@ -70,46 +70,46 @@
   --text-body: 16px;
   --text-caption: 13px;
   /* 按钮颜色 */
-  --button-default-bg: #111827;
+  --button-default-bg: #6BB5E8;
   --button-default-text: #ffffff;
-  --button-default-hover: #1f2937;
+  --button-default-hover: #5AA8DE;
   --button-destructive-bg: #dc2626;
   --button-destructive-hover: #b91c1c;
-  --button-secondary-bg: #f3f4f6;
-  --button-secondary-text: #111827;
-  --button-secondary-hover: #e5e7eb;
-  --button-secondary-border: rgba(244, 164, 180, 0.25);
-  --button-ghost-text: #111827;
-  --button-ghost-hover: #f3f4f6;
-  --button-outline-border: #e5e7eb;
+  --button-secondary-bg: #EDF5FC;
+  --button-secondary-text: #2D3A4A;
+  --button-secondary-hover: #E0EEF8;
+  --button-secondary-border: rgba(107, 181, 232, 0.25);
+  --button-ghost-text: #2D3A4A;
+  --button-ghost-hover: #EDF5FC;
+  --button-outline-border: #C8DFF0;
   --button-outline-bg: #ffffff;
-  --button-outline-text: #111827;
-  --button-outline-hover: #f9fafb;
-  --button-link-text: #111827;
+  --button-outline-text: #2D3A4A;
+  --button-outline-hover: #F0F7FC;
+  --button-link-text: #2D3A4A;
   --button-link-bg: transparent;
   --button-link-hover-bg: transparent;
   /* Badge 颜色 */
-  --badge-default-bg: #111827;
+  --badge-default-bg: #6BB5E8;
   --badge-default-text: #ffffff;
-  --badge-default-hover: #1f2937;
-  --badge-secondary-bg: #f3f4f6;
-  --badge-secondary-text: #111827;
-  --badge-secondary-hover: #e5e7eb;
+  --badge-default-hover: #5AA8DE;
+  --badge-secondary-bg: #EDF5FC;
+  --badge-secondary-text: #2D3A4A;
+  --badge-secondary-hover: #E0EEF8;
   --badge-destructive-bg: #fee2e2;
   --badge-destructive-text: #b91c1c;
   --badge-destructive-hover: #fecaca;
-  --badge-outline-text: #111827;
-  --badge-outline-border: #e5e7eb;
+  --badge-outline-text: #2D3A4A;
+  --badge-outline-border: #C8DFF0;
   /* Alert 颜色 */
-  --alert-default-bg: #f9fafb;
-  --alert-default-text: #111827;
-  --alert-default-border: #e5e7eb;
+  --alert-default-bg: #F0F7FC;
+  --alert-default-text: #2D3A4A;
+  --alert-default-border: #C8DFF0;
   --alert-destructive-bg: #fef2f2;
   --alert-destructive-text: #b91c1c;
   --alert-destructive-border: #fecaca;
-  --alert-info-bg: #eff6ff;
-  --alert-info-text: #1d4ed8;
-  --alert-info-border: #bfdbfe;
+  --alert-info-bg: #E8F4FC;
+  --alert-info-text: #3B82C0;
+  --alert-info-border: #A0D0F0;
   --alert-warning-bg: #fffbeb;
   --alert-warning-text: #b45309;
   --alert-warning-border: #fde68a;
@@ -117,20 +117,20 @@
   --alert-success-text: #15803d;
   --alert-success-border: #bbf7d0;
   /* Slider 颜色 */
-  --slider-track-bg: rgba(244, 164, 180, 0.30);
-  --slider-range-bg: #111827;
+  --slider-track-bg: rgba(107, 181, 232, 0.30);
+  --slider-range-bg: #6BB5E8;
   --slider-thumb-bg: #ffffff;
-  --slider-thumb-border: #e5e7eb;
+  --slider-thumb-border: #C8DFF0;
   /* Dialog 颜色 */
   --dialog-bg: #ffffff;
-  --dialog-border: #e5e7eb;
+  --dialog-border: #C8DFF0;
   /* Select 颜色 */
-  --select-trigger-border: #e5e7eb;
+  --select-trigger-border: #C8DFF0;
   --select-content-bg: #ffffff;
-  --select-content-border: #e5e7eb;
-  --select-content-text: #111827;
-  --select-item-focus-bg: #f3f4f6;
-  --select-item-focus-text: #111827;
+  --select-content-border: #C8DFF0;
+  --select-content-text: #2D3A4A;
+  --select-item-focus-bg: #EDF5FC;
+  --select-item-focus-text: #2D3A4A;
 }
 
 body.app-theme--dark {
@@ -278,9 +278,9 @@ a {
   text-decoration: none;
 }
 
-/* 文本选中文本的背景色：使用主题粉的半透明版本 */
+/* 文本选中文本的背景色：使用主题蓝的半透明版本 */
 ::selection {
-  background: rgba(244, 164, 180, 0.28);
+  background: rgba(107, 181, 232, 0.28);
 }
 
 body.app-theme--dark ::selection {

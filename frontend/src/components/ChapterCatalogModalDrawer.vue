@@ -232,11 +232,11 @@ function formatChapterOrdinal(index: number) {
   display: grid;
   gap: 10px;
   padding: 18px 20px;
-  border: 1px solid rgba(109, 90, 74, 0.1);
+  border: 1px solid rgba(107, 181, 232, 0.1);
   border-radius: 22px;
   background:
-    radial-gradient(circle at top right, rgba(52, 107, 97, 0.16), transparent 34%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(244, 240, 233, 0.94));
+    radial-gradient(circle at top right, rgba(107, 181, 232, 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(232, 244, 252, 0.94));
 }
 
 .chapter-catalog-panel__heading {
@@ -296,7 +296,7 @@ function formatChapterOrdinal(index: number) {
   display: grid;
   gap: 6px;
   padding: 16px 18px;
-  border: 1px solid rgba(109, 90, 74, 0.1);
+  border: 1px solid rgba(107, 181, 232, 0.1);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.82);
   text-align: left;
@@ -310,8 +310,8 @@ function formatChapterOrdinal(index: number) {
 
 .chapter-catalog-list__item:hover {
   transform: translateY(-1px);
-  border-color: rgba(52, 107, 97, 0.28);
-  box-shadow: 0 18px 30px rgba(82, 55, 28, 0.08);
+  border-color: rgba(107, 181, 232, 0.28);
+  box-shadow: 0 18px 30px rgba(107, 181, 232, 0.08);
   background: rgba(255, 255, 255, 0.94);
 }
 

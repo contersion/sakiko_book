@@ -1,5 +1,5 @@
 <template>
-  <div :class="cn('rounded-lg border border-gray-200 bg-white text-gray-900 shadow-none', $attrs.class ?? '')">
+  <div :class="cn('rounded-lg border border-[var(--dialog-border)] bg-white text-[var(--text-primary)] shadow-none', $attrs.class ?? '')">
     <slot />
   </div>
 </template>

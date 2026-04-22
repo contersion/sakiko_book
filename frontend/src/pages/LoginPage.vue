@@ -212,8 +212,8 @@ onMounted(() => {
   gap: 22px;
   padding: clamp(24px, 5vw, 40px);
   background:
-    radial-gradient(circle at top right, rgba(244, 164, 180, 0.22), transparent 34%),
-    radial-gradient(circle at bottom left, rgba(201, 177, 255, 0.12), transparent 30%),
+    radial-gradient(circle at top right, rgba(107, 181, 232, 0.22), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(244, 164, 180, 0.12), transparent 30%),
     color-mix(in srgb, var(--surface-color) 94%, white 6%);
   box-shadow: var(--surface-shadow);
 }

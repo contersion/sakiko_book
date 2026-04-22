@@ -1356,10 +1356,10 @@ function goToBookshelf() {
   );
   min-height: 100dvh;
   padding: var(--reader-page-gutter);
-  /* 二次元阅读页背景：淡粉紫光晕叠加 */
+  /* 二次元阅读页背景：淡蓝粉光晕叠加 */
   background:
-    radial-gradient(circle at 14% 10%, rgba(244, 164, 180, 0.14), transparent 22%),
-    radial-gradient(circle at 86% 16%, rgba(201, 177, 255, 0.12), transparent 24%),
+    radial-gradient(circle at 14% 10%, rgba(107, 181, 232, 0.14), transparent 22%),
+    radial-gradient(circle at 86% 16%, rgba(244, 164, 180, 0.12), transparent 24%),
     radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.2), transparent 32%),
     var(--reader-page-bg);
   color: var(--reader-body);
@@ -1367,25 +1367,25 @@ function goToBookshelf() {
 
 .reader-page--light {
   color-scheme: light;
-  /* 二次元粉白配色：樱花牛奶渐变背景 */
-  --reader-page-bg: linear-gradient(180deg, #FFF5F7 0%, #FFF0F3 100%);
+  /* 二次元蓝粉配色：天空蓝到樱花粉渐变背景 */
+  --reader-page-bg: linear-gradient(180deg, #E8F4FC 0%, #F5EBF2 100%);
   --reader-panel-bg: rgba(255, 255, 255, 0.74);
-  --reader-panel-border: rgba(244, 164, 180, 0.18);
-  --reader-panel-shadow: 0 24px 60px rgba(244, 164, 180, 0.12);
+  --reader-panel-border: rgba(107, 181, 232, 0.18);
+  --reader-panel-shadow: 0 24px 60px rgba(107, 181, 232, 0.12);
   --reader-paper-bg:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 245, 247, 0.92)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(232, 244, 252, 0.92)),
     linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
-  --reader-paper-border: rgba(244, 164, 180, 0.14);
-  --reader-paper-shadow: 0 30px 80px rgba(244, 164, 180, 0.12);
-  --reader-heading: #2D2D2D;
-  --reader-body: #3D3D3D;
-  --reader-muted: #8A8A8A;
+  --reader-paper-border: rgba(107, 181, 232, 0.14);
+  --reader-paper-shadow: 0 30px 80px rgba(107, 181, 232, 0.12);
+  --reader-heading: #2D3A4A;
+  --reader-body: #3D4A5A;
+  --reader-muted: #7A8A9A;
   --reader-accent: #F4A4B4;
-  --reader-progress-rail: rgba(244, 164, 180, 0.2);
+  --reader-progress-rail: rgba(107, 181, 232, 0.2);
   --reader-action-bg: rgba(255, 255, 255, 0.58);
   --reader-action-hover: rgba(255, 255, 255, 0.86);
-  --reader-settings-bg: rgba(255, 245, 247, 0.56);
-  --reader-settings-border: rgba(244, 164, 180, 0.12);
+  --reader-settings-bg: rgba(232, 244, 252, 0.56);
+  --reader-settings-border: rgba(107, 181, 232, 0.12);
 }
 
 .reader-page--dark {
@@ -1842,7 +1842,7 @@ function goToBookshelf() {
 }
 
 .reader-page--light .reader-catalog__list {
-  scrollbar-color: rgba(244, 164, 180, 0.5) transparent;
+  scrollbar-color: rgba(107, 181, 232, 0.5) transparent;
 }
 
 .reader-page--dark .reader-catalog__list {
@@ -1858,12 +1858,12 @@ function goToBookshelf() {
 }
 
 .reader-page--light .reader-catalog__list::-webkit-scrollbar-thumb {
-  background: rgba(244, 164, 180, 0.5);
+  background: rgba(107, 181, 232, 0.5);
   border-radius: 999px;
 }
 
 .reader-page--light .reader-catalog__list::-webkit-scrollbar-thumb:hover {
-  background: rgba(244, 164, 180, 0.7);
+  background: rgba(107, 181, 232, 0.7);
 }
 
 .reader-page--dark .reader-catalog__list::-webkit-scrollbar-thumb {

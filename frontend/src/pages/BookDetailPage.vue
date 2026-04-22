@@ -642,9 +642,9 @@ watch(
   gap: 24px;
   padding: clamp(24px, 4vw, 32px);
   border-radius: 28px;
-  /* 二次元风格英雄区：淡粉紫光晕 + 奶白底色 */
+  /* 二次元风格英雄区：淡蓝粉光晕 + 奶白底色 */
   background:
-    radial-gradient(circle at top right, rgba(201, 177, 255, 0.18), transparent 26%),
+    radial-gradient(circle at top right, rgba(107, 181, 232, 0.18), transparent 26%),
     radial-gradient(circle at bottom left, rgba(244, 164, 180, 0.16), transparent 32%),
     color-mix(in srgb, var(--surface-color) 94%, white 6%);
   box-shadow: var(--surface-shadow);
@@ -656,9 +656,9 @@ watch(
   place-items: center;
   min-height: 280px;
   border-radius: 24px;
-  /* 二次元 pastel 粉紫渐变封面背景 */
+  /* 二次元 pastel 蓝粉渐变封面背景 */
   background:
-    linear-gradient(155deg, rgba(244, 164, 180, 0.92), rgba(201, 177, 255, 0.92)),
+    linear-gradient(155deg, rgba(107, 181, 232, 0.92), rgba(244, 164, 180, 0.92)),
     linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent);
   color: white;
   overflow: hidden;
@@ -707,7 +707,7 @@ watch(
   width: fit-content;
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(244, 164, 180, 0.16);
+  background: rgba(107, 181, 232, 0.16);
   color: var(--primary-color);
   font-size: 12px;
   font-weight: 700;
@@ -890,9 +890,9 @@ watch(
   place-items: center;
   min-height: 280px;
   border-radius: 22px;
-  border: 1px solid rgba(244, 164, 180, 0.22);
-  /* 二次元 pastel 粉白渐变 */
-  background: linear-gradient(180deg, #FFFDFE 0%, #F5E8EC 100%);
+  border: 1px solid rgba(107, 181, 232, 0.22);
+  /* 二次元 pastel 蓝白渐变 */
+  background: linear-gradient(180deg, #F8FCFF 0%, #E8F0F5 100%);
   overflow: hidden;
   color: var(--text-secondary);
 }
