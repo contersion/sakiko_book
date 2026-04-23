@@ -381,8 +381,32 @@
               </div>
             </div>
 
-            <div class="rule-form__field"><label>Flags</label>
-              <Input v-model="testState.flags" placeholder="例如：MULTILINE 或 IGNORECASE|MULTILINE" />
+            <div class="rule-form__field">
+              <div class="rule-form__label-row">
+                <label>Flags</label>
+                <Button type="button" variant="ghost" size="sm" class="rule-form__help-btn" @click="testFlagsHelpVisible = !testFlagsHelpVisible">
+                  ?
+                </Button>
+              </div>
+              <div class="rule-flags-group">
+                <Button
+                  v-for="opt in FLAG_OPTIONS"
+                  :key="opt.key"
+                  type="button"
+                  size="sm"
+                  :variant="isFlagActive(testState.flags, opt.key) ? 'secondary' : 'outline'"
+                  @click="toggleFlag(testState, opt.key)"
+                >
+                  <Check v-if="isFlagActive(testState.flags, opt.key)" :size="14" class="mr-1" />
+                  {{ opt.label }}
+                </Button>
+              </div>
+              <div v-show="testFlagsHelpVisible" class="rule-flags-help">
+                <div v-for="opt in FLAG_OPTIONS" :key="opt.key" class="rule-flags-help__item">
+                  <code>{{ opt.label }}</code>
+                  <span>{{ opt.description }}</span>
+                </div>
+              </div>
             </div>
 
             <div class="rule-form__field"><label>测试方式</label>
@@ -551,8 +575,32 @@
           </div>
         </div>
 
-        <div class="rule-form__field"><label>Flags</label>
-          <Input v-model="formModel.flags" placeholder="例如：MULTILINE 或 IGNORECASE|MULTILINE" />
+        <div class="rule-form__field">
+          <div class="rule-form__label-row">
+            <label>Flags</label>
+            <Button type="button" variant="ghost" size="sm" class="rule-form__help-btn" @click="formFlagsHelpVisible = !formFlagsHelpVisible">
+              ?
+            </Button>
+          </div>
+          <div class="rule-flags-group">
+            <Button
+              v-for="opt in FLAG_OPTIONS"
+              :key="opt.key"
+              type="button"
+              size="sm"
+              :variant="isFlagActive(formModel.flags, opt.key) ? 'secondary' : 'outline'"
+              @click="toggleFlag(formModel, opt.key)"
+            >
+              <Check v-if="isFlagActive(formModel.flags, opt.key)" :size="14" class="mr-1" />
+              {{ opt.label }}
+            </Button>
+          </div>
+          <div v-show="formFlagsHelpVisible" class="rule-flags-help">
+            <div v-for="opt in FLAG_OPTIONS" :key="opt.key" class="rule-flags-help__item">
+              <code>{{ opt.label }}</code>
+              <span>{{ opt.description }}</span>
+            </div>
+          </div>
         </div>
 
         <div class="rule-form__field"><label>说明</label>
@@ -602,6 +650,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Check } from "lucide-vue-next";
 import { notify } from "@/utils/notify";
 
 import { booksApi } from "../api/books";
@@ -662,6 +711,14 @@ const regexExamples: RegexExample[] = [
   },
 ];
 
+const FLAG_OPTIONS = [
+  { key: "IGNORECASE", label: "IGNORECASE", description: "忽略大小写匹配" },
+  { key: "MULTILINE", label: "MULTILINE", description: "^ 和 $ 匹配每行的开头和结尾" },
+  { key: "DOTALL", label: "DOTALL", description: ". 匹配包括换行符在内的所有字符" },
+  { key: "VERBOSE", label: "VERBOSE", description: "允许在正则中插入注释和空白" },
+  { key: "FULL_TEXT", label: "FULL_TEXT", description: "不解析章节，整本书作为一个章节" },
+] as const;
+
 
 const rules = ref<ChapterRule[]>([]);
 const books = ref<BookShelfItem[]>([]);
@@ -679,6 +736,8 @@ const testResult = ref<ChapterRuleTestResponse | null>(null);
 const applyResult = ref<BookReparseResponse | null>(null);
 const modalVisible = ref(false);
 const editingRuleId = ref<number | null>(null);
+const formFlagsHelpVisible = ref(false);
+const testFlagsHelpVisible = ref(false);
 const formModel = reactive<RuleFormModel>(createEmptyForm());
 const testState = reactive<RuleTestState>({
   mode: "book",
@@ -754,6 +813,26 @@ function createEmptyForm(): RuleFormModel {
     description: "",
     is_default: false,
   };
+}
+
+function parseFlagsString(flagsStr: string): string[] {
+  if (!flagsStr.trim()) return [];
+  return flagsStr.split(/[|,\s]+/).filter(Boolean);
+}
+
+function isFlagActive(flagsStr: string, key: string): boolean {
+  return parseFlagsString(flagsStr).includes(key);
+}
+
+function toggleFlag(target: { flags: string }, key: string) {
+  const keys = parseFlagsString(target.flags);
+  const index = keys.indexOf(key);
+  if (index >= 0) {
+    keys.splice(index, 1);
+  } else {
+    keys.push(key);
+  }
+  target.flags = keys.join("|");
 }
 
 function resetForm() {
@@ -1799,6 +1878,62 @@ onUnmounted(() => {
 
 .rule-result-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+.rule-form__label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.rule-form__help-btn {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-secondary);
+}
+
+.rule-flags-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rule-flags-help {
+  margin-top: 10px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--surface-soft, rgba(255, 245, 247, 0.56));
+  border: 1px solid var(--border-color-soft);
+  display: grid;
+  gap: 8px;
+}
+
+.rule-flags-help__item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.rule-flags-help__item code {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(74, 159, 217, 0.12);
+  color: var(--primary-color);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rule-flags-help__item span {
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 </style>
