@@ -148,14 +148,17 @@ async function request<T>(path: string, options: RequestOptions = {}) {
 
   let response: Response;
 
+  const requestUrl = buildApiUrl(path, query);
   try {
-    response = await fetch(buildApiUrl(path, query), {
+    response = await fetch(requestUrl, {
       method,
       headers: requestHeaders,
       body: payload,
       signal,
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("[API] fetch failed:", { url: requestUrl, method, error });
     const message = error instanceof DOMException && error.name === "AbortError"
       ? "请求已取消"
       : "无法连接到后端服务，请确认后端已启动";

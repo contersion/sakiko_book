@@ -11,7 +11,7 @@ services:
       HOST: 0.0.0.0
       PORT: 8000
       API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
-      CORS_ORIGINS: '${CORS_ORIGINS:-["http://localhost:21413","http://127.0.0.1:21413"]}'
+      CORS_ORIGINS: '${CORS_ORIGINS:-["http://localhost:21412","http://127.0.0.1:21412"]}'
       DATA_DIR: ${DATA_DIR:-/app/data}
       UPLOAD_DIR: ${UPLOAD_DIR:-/app/uploads}
       DATABASE_URL: ${DATABASE_URL:-}
