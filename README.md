@@ -100,7 +100,7 @@ cp .env.example .env
 
 常用配置项包括：
 
-* `BACKEND_PORT`：宿主机后端端口，默认 `7000`
+* `BACKEND_PORT`：宿主机后端端口，默认 `7001`
 * `FRONTEND_PORT`：宿主机前端端口，默认 `21412`
 * `VITE_API_BASE_URL`：前端构建时使用的 API 地址
 * `CORS_ORIGINS`：允许访问后端的浏览器来源
@@ -227,7 +227,7 @@ python scripts/manage_admin_user.py --old-username admin --new-username contersi
 服务启动后，可通过以下地址访问：
 
 * 前端页面：`http://localhost:21412`
-* 后端接口：`http://localhost:7000`
+* 后端接口：`http://localhost:7001`
 * 健康检查：`http://localhost:7000/health`
 * Swagger 文档：`http://localhost:7000/docs`（仅在 `DEBUG=true` 时可用）
 
@@ -259,7 +259,7 @@ docker compose up --build -d
 
 ## API 文档与调试说明
 
-`http://127.0.0.1:7000/docs` 对应的是 FastAPI 自动生成的 Swagger UI。它主要用于：
+`http://127.0.0.1:7001/docs` 对应的是 FastAPI 自动生成的 Swagger UI。它主要用于：
 
 - 查看所有后端接口、参数、返回结构
 - 直接在浏览器中调接口做测试
@@ -524,7 +524,7 @@ docker compose logs -f frontend
 默认访问地址是：
 
 - 前端：`http://localhost:21412`
-- 后端：`http://localhost:7000`
+- 后端：`http://localhost:7001`
 
 如果你修改了端口，请确认 `.env` 中的：
 
@@ -593,9 +593,9 @@ docker compose logs -f frontend
 
 这是一次真实部署后的兼容性调整。
 
-在当前部署环境里，`8000`、`24412` 和 `14412` 已被其他服务占用，因此项目默认改用 `7000` 作为后端宿主机端口、`21412` 作为前端宿主机端口。前端容器内部仍然由 Nginx 监听 `80`，后端容器内部仍然由 Uvicorn 监听 `8000`，只是对外映射改成了当前机器可直接使用的端口组合。
+在当前部署环境里，`8000`、`24412` 和 `14412` 已被其他服务占用，因此项目默认改用 `7001` 作为后端宿主机端口、`21412` 作为前端宿主机端口。前端容器内部仍然由 Nginx 监听 `80`，后端容器内部仍然由 Uvicorn 监听 `8000`，只是对外映射改成了当前机器可直接使用的端口组合。
 
-因为前端已经通过同源 `/api` 代理到后端，所以实际对外优先只需要开放前端端口 `21412`；后端 `7000` 更适合保留给本机调试、内网或受控环境使用。
+因为前端已经通过同源 `/api` 代理到后端，所以实际对外优先只需要开放前端端口 `21412`；后端 `7001` 更适合保留给本机调试、内网或受控环境使用。
 
 ### 10. PWA 安装后为什么没有网络也能打开，但看不到书架内容？
 
