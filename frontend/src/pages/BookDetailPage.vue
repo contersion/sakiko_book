@@ -97,7 +97,7 @@
               <Button size="lg" :disabled="readingPending" @click="handleReadAction">
                 {{ readActionLabel }}
               </Button>
-              <Button variant="ghost" size="lg" @click="openCatalog">查看目录</Button>
+              <Button variant="outline" size="lg" @click="openCatalog">查看目录</Button>
               <Button variant="outline" size="lg" @click="openEditor">编辑信息</Button>
             </div>
           </div>
@@ -984,7 +984,7 @@ watch(
   padding: 10px 12px;
   border: 1px solid var(--border-color-soft);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--surface-input-bg);
   color: var(--text-primary);
   font-family: inherit;
   font-size: 14px;

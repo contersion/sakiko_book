@@ -198,7 +198,7 @@ function formatChapterOrdinal(index: number) {
   right: 0;
   height: 100%;
   overflow-y: auto;
-  background: #fff;
+  background: var(--surface-color);
   padding: 20px;
   box-sizing: border-box;
 }
@@ -232,11 +232,11 @@ function formatChapterOrdinal(index: number) {
   display: grid;
   gap: 10px;
   padding: 18px 20px;
-  border: 1px solid rgba(74, 159, 217, 0.1);
+  border: 1px solid var(--border-color-soft);
   border-radius: 22px;
   background:
     radial-gradient(circle at top right, rgba(74, 159, 217, 0.16), transparent 34%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(232, 244, 252, 0.94));
+    linear-gradient(135deg, var(--surface-raised), var(--surface-soft));
 }
 
 .chapter-catalog-panel__heading {
@@ -296,9 +296,9 @@ function formatChapterOrdinal(index: number) {
   display: grid;
   gap: 6px;
   padding: 16px 18px;
-  border: 1px solid rgba(74, 159, 217, 0.1);
+  border: 1px solid var(--border-color-soft);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--surface-panel-bg);
   text-align: left;
   cursor: pointer;
   transition:
@@ -310,9 +310,9 @@ function formatChapterOrdinal(index: number) {
 
 .chapter-catalog-list__item:hover {
   transform: translateY(-1px);
-  border-color: rgba(74, 159, 217, 0.28);
-  box-shadow: 0 18px 30px rgba(74, 159, 217, 0.08);
-  background: rgba(255, 255, 255, 0.94);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-soft);
+  background: var(--surface-panel-soft-bg);
 }
 
 .chapter-catalog-list__item:focus-visible {
