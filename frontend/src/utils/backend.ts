@@ -85,6 +85,14 @@ export function getRemoteBaseUrlValidationMessage(input: string | null | undefin
     return "远程后端地址只支持 http 或 https。";
   }
 
+  if (
+    typeof window !== "undefined" &&
+    window.location.protocol === "https:" &&
+    parsedUrl.protocol === "http:"
+  ) {
+    return "当前页面通过 HTTPS 访问，无法连接 HTTP 后端。远程后端必须使用 https://，或将前端改为 HTTP 访问。";
+  }
+
   if (parsedUrl.search || parsedUrl.hash) {
     return "远程后端地址不要包含查询参数或锚点。";
   }
