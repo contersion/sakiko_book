@@ -13,11 +13,11 @@ export default defineConfig({
         name: "初华的书",
         short_name: "初华的书",
         description: "个人 TXT 在线阅读器",
-        // theme_color 使用蓝色：Chrome 安卓 PWA 加载进度条颜色由 theme-color 决定，
-        // 深色会导致进度条显示为白色/浅灰（对比色）。蓝色可让进度条恢复 Chrome 默认色。
+        // theme_color 影响 Chrome 安卓 PWA 的系统 UI 颜色。
+        // 使用蓝色使进度条保持 Chrome 默认蓝色，避免深色 theme_color 导致白色对比色进度条。
         theme_color: "#4A9FD9",
         background_color: "#141426",
-        display: "standalone",
+        display: "fullscreen",
         orientation: "portrait",
         scope: "/",
         start_url: "/",

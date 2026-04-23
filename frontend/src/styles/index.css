@@ -246,28 +246,23 @@ body.app-theme--light {
 }
 
 html,
-body,
-#app {
-  min-height: 100%;
-  /* 继承 body 背景色，防止任何情况下透出底层白色 */
-  background: inherit;
-  /* 确保 #app 始终填满视口高度，不留空隙 */
-  min-height: 100dvh;
-}
-
-html,
 body {
   margin: 0;
 }
 
 html {
-  /* 兜底背景色：防止任何情况下透出白色 */
+  /* 兜底背景色：必须单独设置，不能和 #app 共用选择器，
+     避免 background: inherit 在根元素上被解析为透明 */
   background-color: #1A1A2E;
+  min-height: 100%;
+  min-height: 100dvh;
 }
 
 body {
   background: var(--app-background);
   background-color: #1A1A2E;
+  min-height: 100%;
+  min-height: 100dvh;
   color: var(--text-primary);
   line-height: 1.5;
   transition:
@@ -278,6 +273,18 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+}
+
+/* fullscreen 模式下，系统安全区域应该为 0；
+   如果某些设备/浏览器版本不完全支持，强制 padding 为 0
+   防止顶部/底部出现意外的白色填充区域 */
+@media (display-mode: fullscreen) {
+  body {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
 }
 
 /* BookDetailPage layout: page-level gutter + max-width constraint */
