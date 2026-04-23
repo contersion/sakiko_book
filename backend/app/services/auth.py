@@ -1,7 +1,7 @@
 ﻿from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.security import verify_password
+from app.core.security import get_password_hash, verify_password
 from app.models import User
 
 
@@ -17,3 +17,8 @@ def authenticate_user(db: Session, username: str, password: str) -> User | None:
     if not verify_password(password, user.password_hash):
         return None
     return user
+
+
+def change_user_password(db: Session, user: User, new_password: str) -> None:
+    user.password_hash = get_password_hash(new_password)
+    db.commit()
