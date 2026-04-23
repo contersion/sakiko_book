@@ -361,7 +361,7 @@ import PageStatusPanel from "../components/PageStatusPanel.vue";
 import { formatPercent } from "../utils/format";
 import { authTokenStorage } from "../utils/token";
 
-const PROGRESS_THROTTLE_MS = 15000;
+const PROGRESS_THROTTLE_MS = 5000;
 const READER_SCROLL_ANCHOR = 120;
 const COMPACT_BREAKPOINT = 980;
 const MOBILE_CONTENT_WIDTH_MIN_PERCENT = 84;
@@ -414,7 +414,7 @@ const preferencesStore = usePreferencesStore();
 const booksCacheStore = useBooksCacheStore();
 const chapters = ref<BookChapter[]>([]);
 const bookTitle = ref("");
-const progress = ref<ReadingProgress | null>(null);
+const progress = ref<ProgressSnapshot | null>(null);
 const sessionProgress = ref<ProgressSnapshot | null>(null);
 const currentChapter = ref<BookChapterContent | null>(null);
 const currentChapterIndex = ref(0);
@@ -661,6 +661,8 @@ onMounted(() => {
   window.addEventListener("resize", handleWindowResize, { passive: true });
   window.addEventListener("scroll", handleWindowScroll, { passive: true });
   window.addEventListener("pagehide", handlePageHide);
+  window.addEventListener("beforeunload", handleBeforeUnload);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 });
 
 onUnmounted(() => {
@@ -675,6 +677,14 @@ onUnmounted(() => {
   window.removeEventListener("resize", handleWindowResize);
   window.removeEventListener("scroll", handleWindowScroll);
   window.removeEventListener("pagehide", handlePageHide);
+  window.removeEventListener("beforeunload", handleBeforeUnload);
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
+
+  // 卸载前同步备份到本地，防止导航后刷新丢失进度
+  const snapshot = captureCurrentProgressSnapshot();
+  if (snapshot) {
+    saveProgressToLocal(props.bookId, snapshot);
+  }
 
   void preferencesStore.flushPendingPatch();
 });
@@ -685,6 +695,48 @@ function clamp(value: number, min: number, max: number) {
 
 function roundPercent(value: number) {
   return Number(value.toFixed(2));
+}
+
+function getLocalProgressKey(bookId: number): string {
+  return `reader:progress:${bookId}`;
+}
+
+function saveProgressToLocal(bookId: number, snapshot: ProgressSnapshot) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(getLocalProgressKey(bookId), JSON.stringify(snapshot));
+  } catch {
+    // ignore
+  }
+}
+
+function loadProgressFromLocal(bookId: number): ProgressSnapshot | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(getLocalProgressKey(bookId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<ProgressSnapshot>;
+    if (
+      typeof parsed.chapter_index !== "number" ||
+      typeof parsed.char_offset !== "number" ||
+      typeof parsed.percent !== "number" ||
+      typeof parsed.updated_at !== "string"
+    ) {
+      return null;
+    }
+    return parsed as ProgressSnapshot;
+  } catch {
+    return null;
+  }
+}
+
+function clearProgressLocal(bookId: number) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(getLocalProgressKey(bookId));
+  } catch {
+    // ignore
+  }
 }
 
 function mapReaderContentWidthForMobile(contentWidth: number) {
@@ -1061,6 +1113,7 @@ function syncSessionProgressFromViewport() {
 
   hasMeaningfulReadingActivity.value = true;
   sessionProgress.value = snapshot;
+  saveProgressToLocal(props.bookId, snapshot);
   scheduleProgressSync();
 }
 
@@ -1068,6 +1121,8 @@ async function restoreScrollForCharOffset(charOffset: number, smoothScroll = fal
   await nextTick();
 
   if (typeof window === "undefined" || !contentRef.value || !currentChapter.value) {
+    // eslint-disable-next-line no-console
+    console.log("[ReaderPage] restoreScroll skipped", { reason: "no contentRef or currentChapter", contentRef: !!contentRef.value, currentChapter: !!currentChapter.value });
     return;
   }
 
@@ -1087,6 +1142,17 @@ async function restoreScrollForCharOffset(charOffset: number, smoothScroll = fal
   window.scrollTo({
     top: targetTop,
     behavior: smoothScroll ? "smooth" : "auto",
+  });
+
+  // eslint-disable-next-line no-console
+  console.log("[ReaderPage] restoreScroll executed", {
+    charOffset,
+    trimmedPrefixLength: currentChapterTrimmedPrefixLength.value,
+    renderedLength,
+    adjustedCharOffset,
+    ratio,
+    targetTop,
+    scrollY: window.scrollY,
   });
 }
 
@@ -1141,8 +1207,22 @@ async function loadReader() {
 
     bookTitle.value = bookDetail?.title || cachedBookDetail?.title || "";
     chapters.value = chapterList;
-    progress.value = latestProgress;
-    lastSavedProgressKey = latestProgress ? getProgressKey(latestProgress) : "";
+
+    // 合并后端进度和本地备份，优先使用本地备份（当前设备最新状态）
+    const localProgress = loadProgressFromLocal(props.bookId);
+    const mergedProgress = localProgress || latestProgress || null;
+
+    progress.value = mergedProgress ? toProgressSnapshot(mergedProgress as ReadingProgress) : null;
+    lastSavedProgressKey = mergedProgress ? getProgressKey(mergedProgress) : "";
+
+    // eslint-disable-next-line no-console
+    console.log("[ReaderPage] loadReader progress merge", {
+      bookId: props.bookId,
+      local: localProgress,
+      server: latestProgress,
+      merged: mergedProgress,
+      routeChapter: route.params.chapterIndex,
+    });
 
     // 如果使用了缓存，后台静默刷新最新数据
     if (cachedChapters) {
@@ -1164,16 +1244,19 @@ async function loadReader() {
     const shouldUseRouteChapter = routeState.provided && routeState.valid;
     const requestedIndex = shouldUseRouteChapter
       ? routeState.value
-      : latestProgress?.chapter_index ?? 0;
+      : mergedProgress?.chapter_index ?? 0;
     const normalizedIndex = normalizeChapterIndex(requestedIndex);
     const restoreCharOffset = shouldUseRouteChapter
-      ? 0
-      : latestProgress?.chapter_index === normalizedIndex
-        ? latestProgress.char_offset
+      ? (mergedProgress?.chapter_index === routeState.value ? mergedProgress.char_offset : 0)
+      : mergedProgress?.chapter_index === normalizedIndex
+        ? mergedProgress.char_offset
         : 0;
     const shouldSyncRoute = routeState.provided
       ? !routeState.valid || normalizedIndex !== routeState.value
       : normalizedIndex !== 0;
+
+    // 先结束页面 loading，让 DOM 渲染出来，再恢复滚动位置
+    loading.value = false;
 
     await openChapter(normalizedIndex, {
       syncRoute: shouldSyncRoute,
@@ -1189,7 +1272,9 @@ async function loadReader() {
     currentChapter.value = null;
     pageError.value = getErrorMessage(error);
   } finally {
-    loading.value = false;
+    if (loading.value) {
+      loading.value = false;
+    }
   }
 }
 
@@ -1237,6 +1322,7 @@ async function flushProgress(
     sessionProgress.value = toProgressSnapshot(saved);
     lastSavedProgressKey = getProgressKey(saved);
     syncState.value = "idle";
+    clearProgressLocal(props.bookId);
   } catch {
     syncState.value = "error";
   } finally {
@@ -1380,6 +1466,34 @@ function handlePageHide() {
   });
 }
 
+function handleBeforeUnload() {
+  const snapshot = captureCurrentProgressSnapshot();
+  if (snapshot) {
+    saveProgressToLocal(props.bookId, snapshot);
+    attemptKeepaliveProgressSave(snapshot);
+  }
+}
+
+function handleVisibilityChange() {
+  if (document.visibilityState !== "hidden") {
+    return;
+  }
+
+  if (!hasMeaningfulReadingActivity.value) {
+    return;
+  }
+
+  const snapshot = captureCurrentProgressSnapshot();
+  if (snapshot) {
+    saveProgressToLocal(props.bookId, snapshot);
+  }
+
+  void flushProgress("visibilitychange", {
+    keepalive: true,
+    force: true,
+  });
+}
+
 function handleChapterSelect(chapterIndex: number) {
   activeDrawer.value = null;
 
@@ -1411,7 +1525,16 @@ function handleNextChapter() {
   handleChapterSelect(currentChapterIndex.value + 1);
 }
 
+function saveSnapshotBeforeNavigate(reason: string) {
+  const snapshot = captureCurrentProgressSnapshot();
+  if (snapshot) {
+    saveProgressToLocal(props.bookId, snapshot);
+    void flushProgress(reason, { snapshot, force: true });
+  }
+}
+
 function goBack() {
+  saveSnapshotBeforeNavigate("navigate-back");
   void router.push({
     name: "book-detail",
     params: { bookId: props.bookId },
@@ -1419,6 +1542,7 @@ function goBack() {
 }
 
 function goToBookshelf() {
+  saveSnapshotBeforeNavigate("navigate-bookshelf");
   void router.push({ name: "books" });
 }
 </script>
