@@ -1120,9 +1120,13 @@ function syncSessionProgressFromViewport() {
 async function restoreScrollForCharOffset(charOffset: number, smoothScroll = false) {
   await nextTick();
 
+  // 如果 DOM 还没渲染完，等一帧再试
+  if (!contentRef.value) {
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await nextTick();
+  }
+
   if (typeof window === "undefined" || !contentRef.value || !currentChapter.value) {
-    // eslint-disable-next-line no-console
-    console.log("[ReaderPage] restoreScroll skipped", { reason: "no contentRef or currentChapter", contentRef: !!contentRef.value, currentChapter: !!currentChapter.value });
     return;
   }
 
@@ -1142,17 +1146,6 @@ async function restoreScrollForCharOffset(charOffset: number, smoothScroll = fal
   window.scrollTo({
     top: targetTop,
     behavior: smoothScroll ? "smooth" : "auto",
-  });
-
-  // eslint-disable-next-line no-console
-  console.log("[ReaderPage] restoreScroll executed", {
-    charOffset,
-    trimmedPrefixLength: currentChapterTrimmedPrefixLength.value,
-    renderedLength,
-    adjustedCharOffset,
-    ratio,
-    targetTop,
-    scrollY: window.scrollY,
   });
 }
 
@@ -1214,15 +1207,6 @@ async function loadReader() {
 
     progress.value = mergedProgress ? toProgressSnapshot(mergedProgress as ReadingProgress) : null;
     lastSavedProgressKey = mergedProgress ? getProgressKey(mergedProgress) : "";
-
-    // eslint-disable-next-line no-console
-    console.log("[ReaderPage] loadReader progress merge", {
-      bookId: props.bookId,
-      local: localProgress,
-      server: latestProgress,
-      merged: mergedProgress,
-      routeChapter: route.params.chapterIndex,
-    });
 
     // 如果使用了缓存，后台静默刷新最新数据
     if (cachedChapters) {
@@ -1483,11 +1467,8 @@ function handleVisibilityChange() {
     return;
   }
 
-  const snapshot = captureCurrentProgressSnapshot();
-  if (snapshot) {
-    saveProgressToLocal(props.bookId, snapshot);
-  }
-
+  // 不覆盖 localStorage，避免与 saveSnapshotBeforeNavigate 竞态
+  // keepalive flushProgress 成功后会自动 clearProgressLocal
   void flushProgress("visibilitychange", {
     keepalive: true,
     force: true,
@@ -1529,7 +1510,7 @@ function saveSnapshotBeforeNavigate(reason: string) {
   const snapshot = captureCurrentProgressSnapshot();
   if (snapshot) {
     saveProgressToLocal(props.bookId, snapshot);
-    void flushProgress(reason, { snapshot, force: true });
+    void flushProgress(reason, { snapshot, force: true, keepalive: true });
   }
 }
 
