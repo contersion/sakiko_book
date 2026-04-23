@@ -71,6 +71,16 @@ function applyThemeToDocument(theme: AppThemeMode) {
   document.body.classList.remove(`${APP_THEME_CLASS_PREFIX}light`, `${APP_THEME_CLASS_PREFIX}dark`);
   document.body.classList.add(nextThemeClass);
   document.documentElement.style.colorScheme = theme;
+
+  // 动态更新 theme-color meta，使 PWA 状态栏/导航栏颜色与当前主题匹配
+  // 避免暗色模式下系统 UI 显示浅色产生白线/色边
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute(
+      "content",
+      theme === "dark" ? "#1A1A2E" : "#4A9FD9",
+    );
+  }
 }
 
 interface AppThemeState {

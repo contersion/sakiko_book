@@ -937,6 +937,16 @@ function handleWindowResize() {
 function openDrawer(view: ReaderDrawerView) {
   activeDrawer.value = view;
   mobileChromeVisible.value = true;
+
+  if (view === "catalog") {
+    // 在下个 tick 主动测量目录列表高度，帮助虚拟列表第一次就正确计算窗口
+    void nextTick().then(() => {
+      const catalogList = catalogListRef.value;
+      if (catalogList && catalogListHeight.value <= 0) {
+        catalogListHeight.value = catalogList.clientHeight;
+      }
+    });
+  }
 }
 
 function setCatalogItemRef(chapterIndex: number, element: Element | ComponentPublicInstance | null) {
@@ -967,40 +977,67 @@ function waitForNextPaint() {
 async function scheduleCatalogAutoScroll() {
   const taskToken = ++catalogScrollToken;
 
-  // 等抽屉和目录项渲染完成后再滚动，避免拿不到当前章节节点。
+  // 等抽屉动画完成（CSS transition 280ms）
+  await new Promise((resolve) => setTimeout(resolve, 350));
   await nextTick();
-  await waitForNextPaint();
   await waitForNextPaint();
 
   if (taskToken !== catalogScrollToken || activeDrawer.value !== "catalog") {
     return;
   }
 
-  scrollCatalogToCurrentChapter();
+  await scrollCatalogToCurrentChapter();
 }
 
-function scrollCatalogToCurrentChapter() {
+async function scrollCatalogToCurrentChapter() {
   const catalogList = catalogListRef.value;
   if (!catalogList) {
     return;
   }
 
-  const currentChapterElement = catalogItemRefs.get(currentChapterIndex.value);
+  const targetIndex = currentChapterIndex.value;
+  const targetTop = targetIndex * CATALOG_ITEM_ESTIMATED_HEIGHT;
 
-  if (currentChapterElement) {
-    currentChapterElement.scrollIntoView({
-      block: "center",
-      inline: "nearest",
-      behavior: "auto",
-    });
+  // 获取列表可视高度：优先用实际测量值，兜底用估计值
+  let listHeight = catalogList.clientHeight;
+  if (!listHeight) {
+    const drawerPanel = catalogList.closest(".reader-drawer__panel") as HTMLElement | null;
+    if (drawerPanel) {
+      listHeight = Math.max(0, drawerPanel.clientHeight - 240);
+    }
+  }
+  listHeight = listHeight || catalogListHeight.value || 400;
+
+  const desiredScrollTop = Math.max(
+    0,
+    targetTop - listHeight / 2 + CATALOG_ITEM_ESTIMATED_HEIGHT / 2,
+  );
+
+  // 第一步：直接设置 scrollTop，触发虚拟列表渲染正确窗口
+  // 不依赖 catalogItemRefs，因为第一次打开时 ref callback 可能还没执行完
+  catalogList.scrollTop = desiredScrollTop;
+
+  // 第二步：等待 DOM 稳定 + Vue ref callback 填充 catalogItemRefs
+  await nextTick();
+  await waitForNextPaint();
+  await new Promise((resolve) => setTimeout(resolve, 80));
+
+  let element = catalogItemRefs.get(targetIndex);
+  if (element) {
+    element.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" });
     return;
   }
 
-  // 虚拟滚动模式下当前项未挂载，手动计算滚动位置
-  if (chapters.value.length > 200) {
-    const targetTop = currentChapterIndex.value * CATALOG_ITEM_ESTIMATED_HEIGHT;
-    catalogList.scrollTop = Math.max(0, targetTop - catalogListHeight.value / 2 + CATALOG_ITEM_ESTIMATED_HEIGHT / 2);
+  // 第三步：如果还没找到，再等待并重试（虚拟列表可能刚完成重渲染）
+  await new Promise((resolve) => setTimeout(resolve, 120));
+  element = catalogItemRefs.get(targetIndex);
+  if (element) {
+    element.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" });
+    return;
   }
+
+  // 第四步：最终兜底——直接 scrollTop 微调，确保目标章节在可视区域内
+  catalogList.scrollTop = Math.max(0, targetTop - listHeight / 3);
 }
 
 function handleReadingSurfaceTap() {
@@ -1642,22 +1679,23 @@ function goToBookshelf() {
   /* 深夜花町配色：深蓝紫背景 */
   --reader-page-bg: linear-gradient(180deg, #1A1A2E 0%, #141426 100%);
   --reader-panel-bg: rgba(37, 37, 64, 0.94);
-  --reader-panel-border: rgba(255, 143, 171, 0.12);
+  /* 夜间模式下边框改为透明，彻底杜绝白线/粉线 */
+  --reader-panel-border: transparent;
   --reader-panel-shadow: 0 24px 64px rgba(0, 0, 0, 0.38);
   --reader-paper-bg:
     linear-gradient(180deg, rgba(30, 30, 50, 0.98), rgba(30, 30, 50, 0.98)),
     linear-gradient(135deg, rgba(30, 30, 50, 0.98), rgba(30, 30, 50, 0.98));
-  --reader-paper-border: rgba(255, 143, 171, 0.1);
+  --reader-paper-border: transparent;
   --reader-paper-shadow: 0 34px 88px rgba(0, 0, 0, 0.42);
   --reader-heading: #FFF0F3;
   --reader-body: #D8D8E8;
   --reader-muted: #A0A0C0;
   --reader-accent: #FF8FAB;
-  --reader-progress-rail: rgba(255, 143, 171, 0.22);
+  --reader-progress-rail: rgba(255, 255, 255, 0.12);
   --reader-action-bg: rgba(255, 255, 255, 0.04);
   --reader-action-hover: rgba(255, 255, 255, 0.08);
   --reader-settings-bg: rgba(255, 143, 171, 0.04);
-  --reader-settings-border: rgba(255, 143, 171, 0.1);
+  --reader-settings-border: transparent;
 }
 
 .reader-page--dark .reader-progress-bar {
@@ -1712,7 +1750,11 @@ function goToBookshelf() {
   border: 1px solid var(--reader-paper-border);
   border-radius: 34px;
   background: var(--reader-paper-bg);
+  background-clip: padding-box;
   box-shadow: var(--reader-paper-shadow);
+  /* 强制 GPU 层，消除移动端 border-radius 边缘抗锯齿产生的亮线 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 /* 只在日间模式下显示纸张顶部高光，避免夜间模式白线 */
