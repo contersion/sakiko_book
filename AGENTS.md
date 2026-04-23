@@ -23,6 +23,17 @@
 - frontend: `npm run dev`
 - docker: see README
 
+## CORS / 跨域规则
+- 后端已添加原生 ASGI `ReflectCORSMiddleware`（`backend/app/main.py`），反射任意 Origin。
+- `ReflectCORSMiddleware` 必须先于标准 `CORSMiddleware` 注册（外层包裹），否则标准 CORS 会先拦截 OPTIONS 返回 400。
+- ASGI scope 中获取 HTTP method 必须使用 `scope["method"]`，而非 `headers[":method"]`。
+- 通过域名 / 反向代理访问时，若仍出现跨域问题，优先检查反向代理是否正确透传 `Origin` 头，而非盲目扩充 CORS 白名单。
+
+## PWA / Service Worker 规则
+- 前端已配置 PWA（`vite-plugin-pwa`），Service Worker 会自动缓存静态资源。
+- 每次前端构建更新后，用户可能需要 Ctrl+F5 强制刷新并手动 Unregister SW，否则可能加载旧版。
+- 新增或修改 PWA 相关配置（manifest、图标、主题色）时，需同步验证 `vite.config.ts` 和 `index.html`。
+
 ## Reading Page Refactor Rules
 - 阅读页允许进行 UI 重构与前端交互重构，但不得修改后端接口、数据库结构、API 字段语义。
 - 阅读正文仍必须按章节加载与返回，不能改为整本返回。

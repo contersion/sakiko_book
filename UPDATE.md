@@ -1,3 +1,48 @@
+## v1.09
+
+Date
+`2026-04-24`
+
+Summary
+本次版本聚焦线上使用体验修复与账户安全增强：
+- 修复通过域名 / 反向代理访问时的 CORS 跨域失败问题（登录报错"无法链接到后端"）。
+- 修复夜间模式下弹窗 / 抽屉 / 下拉栏的透明度与硬编码颜色问题。
+- 新增更改密码功能。
+- 优化移动端书架卡片与详情页交互。
+- 全局去掉书架卡片右上角"开始/继续阅读"标签。
+
+Backend
+- 新增原生 ASGI `ReflectCORSMiddleware`：
+  - 拦截 OPTIONS 预检请求，反射请求中的 `Origin` 头，返回完整的 CORS 响应头。
+  - 非 OPTIONS 请求在响应中动态注入 `Access-Control-Allow-Origin` 和 `Access-Control-Allow-Credentials`。
+  - 优先于标准 `CORSMiddleware` 注册（外层包裹），避免标准 CORS 先拦截 OPTIONS 返回 400。
+  - 解决通过 OpenResty + FRP 域名穿透访问时的跨域问题。
+- 新增更改密码接口 `POST /api/auth/change-password`：
+  - 验证旧密码正确后更新为新密码（PBKDF2-SHA256 + salt）。
+  - 旧密码不正确时返回 401。
+
+Frontend
+- 新增更改密码交互：
+  - `AppLayout.vue` 右上角用户名区域改为下拉菜单（▶ 更改密码 / 退出登录）。
+  - 弹窗表单：当前密码 / 新密码 / 确认新密码，带完整前端校验（必填 / 6位 / 一致性）。
+  - 保存中状态 `passwordPending`，成功后自动退出并跳转登录页。
+  - 移动端下拉菜单错位修复：`@media (max-width: 780px)` 给 `.app-layout__user` 加 `width: fit-content; align-self: flex-end;`。
+- 夜间模式 UI Bug 修复：
+  - `ChapterCatalogModalDrawer.vue`：硬编码白色背景 `#fff` / `rgba(255,255,255,0.82)` → CSS 变量适配暗色。
+  - `BookDetailPage.vue`："查看目录"按钮 `ghost` → `outline`；"编辑信息"弹窗简介 `textarea` 背景改为 `var(--surface-input-bg)`。
+- 移动端书架卡片精简（`@media (max-width: 720px)`）：
+  - 隐藏 `.bookshelf-item__badge` 和 `.bookshelf-item__facts`（作者、章节数、字数、收录时间）。
+  - 缩小卡片网格为 `62px + 1fr`，减少 padding 和 gap。
+- 全局去掉书架卡片右上角阅读标签：`.bookshelf-item__badge { display: none; }`（不限于移动端）。
+- 详情页"返回书架"按钮：`variant="ghost"` → `variant="outline" size="sm"`。
+
+Verification
+- Docker 构建验证通过：
+  - `docker compose up -d --build`
+  - 前端 `http://localhost:21412` 正常访问
+  - 后端 `http://localhost:7000/health` 正常访问
+  - 域名穿透场景下登录、书架、阅读、进度同步均正常
+
 ## v1.08
 
 Date

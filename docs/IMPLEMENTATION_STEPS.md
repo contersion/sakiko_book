@@ -21,7 +21,7 @@
 - TypeScript
 - Vue Router
 - Pinia
-- Naive UI
+- Shadcn Vue + Tailwind CSS
 
 后端：
 - FastAPI
@@ -457,7 +457,7 @@ backend 目录建议至少包含：
 - TypeScript
 - Vue Router
 - Pinia
-- Naive UI
+- Shadcn Vue + Tailwind CSS
 
 请实现：
 1. frontend 项目目录树
@@ -500,7 +500,7 @@ backend 目录建议至少包含：
 
 要求：
 - UI 简洁整洁
-- 使用 Naive UI
+- UI 使用 Shadcn Vue + Tailwind CSS 组件
 - 只输出新增或修改的 frontend 文件
 第 15 段：书架页
 用户开始能看到书了。
@@ -526,7 +526,7 @@ backend 目录建议至少包含：
 - 默认封面占位
 
 要求：
-1. 使用 Naive UI。
+1. UI 使用 Shadcn Vue + Tailwind CSS 组件。
 2. 页面在手机和桌面端都可用。
 3. 上传后刷新列表。
 4. 只输出新增或修改的 frontend 文件。
@@ -577,7 +577,7 @@ backend 目录建议至少包含：
 要求：
 1. 内置规则不可删除。
 2. 使用表格 + 弹窗表单实现。
-3. UI 使用 Naive UI。
+3. UI 使用 Shadcn Vue + Tailwind CSS 组件。
 4. 只输出新增或修改的 frontend 文件。
 第 18 段：规则测试与预览
 把“用户自定义正则”真正做实用。

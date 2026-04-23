@@ -48,7 +48,7 @@ When implementing a new feature:
 - TypeScript
 - Vue Router
 - Pinia
-- Naive UI
+- Shadcn Vue + Tailwind CSS
 
 ### 后端
 
@@ -598,7 +598,7 @@ When implementing a new feature:
 - TypeScript
 - Vue Router
 - Pinia
-- Naive UI
+- Shadcn Vue + Tailwind CSS
 
 ### 请实现
 
@@ -650,7 +650,7 @@ When implementing a new feature:
 ### 要求
 
 - UI 简洁整洁
-- 使用 Naive UI
+- UI 使用 Shadcn Vue + Tailwind CSS 组件
 - 只输出新增或修改的 frontend 文件
 
 ---
@@ -683,7 +683,7 @@ When implementing a new feature:
 
 ### 要求
 
-1. 使用 Naive UI
+1. UI 使用 Shadcn Vue + Tailwind CSS 组件
 2. 页面在手机和桌面端都可用
 3. 上传后刷新列表
 4. 只输出新增或修改的 frontend 文件
@@ -746,7 +746,7 @@ When implementing a new feature:
 
 1. 内置规则不可删除
 2. 使用表格 + 弹窗表单实现
-3. UI 使用 Naive UI
+3. UI 使用 Shadcn Vue + Tailwind CSS 组件
 4. 只输出新增或修改的 frontend 文件
 
 ---
