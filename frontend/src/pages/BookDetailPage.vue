@@ -3,7 +3,7 @@
     <div class="book-detail-page__container">
       <!-- Topbar -->
       <div class="book-detail-page__topbar">
-        <Button variant="ghost" @click="goBack">返回书架</Button>
+        <Button variant="outline" size="sm" @click="goBack">返回书架</Button>
         <span class="book-detail-page__crumb">Book ID: {{ bookId }}</span>
       </div>
 

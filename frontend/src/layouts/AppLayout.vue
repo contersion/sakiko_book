@@ -436,6 +436,8 @@ async function handleChangePassword() {
 
   .app-layout__user {
     justify-content: space-between;
+    width: fit-content;
+    align-self: flex-end;
   }
 
   .app-layout__username,

@@ -1142,6 +1142,11 @@ onUnmounted(() => {
     grid-template-columns: 1fr;
   }
 
+  .bookshelf-item__badge,
+  .bookshelf-item__facts {
+    display: none;
+  }
+
   .bookshelf-page__tabs {
     gap: 8px;
   }
