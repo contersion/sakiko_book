@@ -417,13 +417,47 @@ async function handleChangePassword() {
 
 @media (max-width: 780px) {
   .app-layout__header {
-    flex-direction: column;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "brand user" "nav nav";
+    gap: 10px 16px;
+    align-items: center;
+  }
+
+  .app-layout__brand {
+    grid-area: brand;
   }
 
   .app-layout__actions {
-    flex-direction: column;
-    align-items: stretch;
+    display: contents;
+  }
+
+  .app-layout__nav-actions {
+    grid-area: nav;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .app-layout__user {
+    grid-area: user;
+    justify-self: end;
+    align-self: center;
+    width: auto;
+  }
+
+  .app-layout__user-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .app-layout__backend {
+    display: none;
+  }
+
+  .app-layout__username {
+    max-width: 120px;
+    font-size: 13px;
   }
 
   .app-layout__content {
@@ -432,17 +466,6 @@ async function handleChangePassword() {
 
   .app-layout__content--immersive {
     padding: 0;
-  }
-
-  .app-layout__user {
-    justify-content: space-between;
-    width: fit-content;
-    align-self: flex-end;
-  }
-
-  .app-layout__username,
-  .app-layout__backend {
-    max-width: 100%;
   }
 }
 </style>
