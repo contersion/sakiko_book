@@ -53,13 +53,13 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 Build the image from the `backend` directory:
 
 ```bash
-docker build -t uika_book-backend .
+docker build -t sakiko_book-backend .
 ```
 
 Start the container:
 
 ```bash
-docker run --rm -p 8000:8000 uika_book-backend
+docker run --rm -p 8000:8000 sakiko_book-backend
 ```
 
 If you want persistent local data on the host:
@@ -68,7 +68,7 @@ If you want persistent local data on the host:
 docker run --rm -p 8000:8000 \
   -v $(pwd)/data:/app/data \
   -v $(pwd)/uploads:/app/uploads \
-  uika_book-backend
+  sakiko_book-backend
 ```
 
 ## 7. Default bootstrap behavior

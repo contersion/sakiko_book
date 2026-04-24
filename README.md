@@ -76,8 +76,8 @@
 先克隆仓库并进入项目目录：
 
 ```bash
-git clone https://github.com/contersion/uika_book.git
-cd uika_book
+git clone https://github.com/contersion/sakiko_book.git
+cd sakiko_book
 ```
 
 ### 2. 准备环境变量
