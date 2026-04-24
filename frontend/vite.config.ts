@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       manifest: {
         id: "/",
-        name: "初华的书",
-        short_name: "初华的书",
+        name: "祥子的书",
+        short_name: "祥子的书",
         description: "个人 TXT 在线阅读器",
         // theme_color 影响 Chrome 安卓 PWA 的系统 UI 颜色。
         // 使用蓝色使进度条保持 Chrome 默认蓝色，避免深色 theme_color 导致白色对比色进度条。

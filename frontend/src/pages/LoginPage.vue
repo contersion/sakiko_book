@@ -3,7 +3,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div>
         <div class="login-page__intro">
-          <div class="login-page__eyebrow">初华的书</div>
+          <div class="login-page__eyebrow">祥子的书</div>
           <h1 class="login-page__title">继续你的阅读，而不是重新找回进度</h1>
           <p class="login-page__description">
             登录成功后会自动进入书架；如果你是从业务页被拦截回来的，系统会在认证成功后自动带你回到原来的页面。

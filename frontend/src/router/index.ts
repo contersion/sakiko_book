@@ -119,7 +119,7 @@ router.beforeEach(async (to) => {
     await preferencesStore.ensureReady();
   }
 
-  const pageTitle = to.meta.title ? `${String(to.meta.title)} - 初华的书` : "初华的书";
+  const pageTitle = to.meta.title ? `${String(to.meta.title)} - 祥子的书` : "祥子的书";
   document.title = pageTitle;
 
   return true;

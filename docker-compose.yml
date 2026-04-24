@@ -5,7 +5,7 @@ services:
     container_name: sakiko_book-backend
     restart: unless-stopped
     environment:
-      APP_NAME: ${APP_NAME:-初华的书 API}
+      APP_NAME: ${APP_NAME:-祥子的书 API}
       APP_VERSION: ${APP_VERSION:-0.1.0}
       DEBUG: false
       HOST: 0.0.0.0

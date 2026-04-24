@@ -5,9 +5,9 @@
       class="app-layout__header"
     >
       <div class="app-layout__brand">
-        <img class="app-layout__logo" src="/icon-192.png" alt="初华的书" />
+        <img class="app-layout__logo" src="/icon-192.png" alt="祥子的书" />
         <div>
-          <div class="app-layout__title">初华的书</div>
+          <div class="app-layout__title">祥子的书</div>
           <div class="app-layout__subtitle">个人在线阅读器</div>
         </div>
       </div>

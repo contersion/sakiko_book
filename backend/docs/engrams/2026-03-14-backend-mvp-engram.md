@@ -1,4 +1,4 @@
-﻿# Engram: 初华的书 Backend MVP Memory
+﻿# Engram: 祥子的书 Backend MVP Memory
 
 - Date: 2026-03-14
 - Scope: Backend rounds 1-12

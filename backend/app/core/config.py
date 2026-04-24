@@ -11,7 +11,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    app_name: str = "初华的书 API"
+    app_name: str = "祥子的书 API"
     app_version: str = "0.1.0"
     debug: bool = True
     host: str = "0.0.0.0"

@@ -51,7 +51,7 @@ Date
 Summary
 本次版本包含两大主题更新：
 1. 日间模式整体配色从粉白单一色调升级为「水色天空蓝 + 樱花粉」的二次元蓝粉配色，并进一步加深饱和度，提升视觉辨识度。
-2. 项目正式支持 PWA（Progressive Web App），应用名称「初华的书」，可安装为安卓 fullscreen 沉浸式全屏应用。
+2. 项目正式支持 PWA（Progressive Web App），应用名称「祥子的书」，可安装为安卓 fullscreen 沉浸式全屏应用。
 
 Frontend
 - 日间模式蓝粉配色重构（饱和度加深版）：
@@ -78,7 +78,7 @@ Frontend
 - PWA 全屏应用配置：
   - 安装 `vite-plugin-pwa` 并集成到 `vite.config.ts`。
   - 自动生成 Service Worker（`sw.js` + `workbox`），静态资源离线缓存，API 不缓存。
-  - Web App Manifest：`name: "初华的书"`，`display: fullscreen`，`theme_color: #4A9FD9`，`background_color: #D6ECFA`。
+  - Web App Manifest：`name: "祥子的书"`，`display: fullscreen`，`theme_color: #4A9FD9`，`background_color: #D6ECFA`。
   - 图标生成：基于用户提供图片生成 `icon-192.png`、`icon-512.png`、`apple-touch-icon.png`、`favicon.png`。
   - `index.html` 更新：`viewport-fit=cover`、theme-color、apple-mobile-web-app 标签、favicon。
   - CSS 安全区域适配：body 添加 `env(safe-area-inset-top/bottom/left/right)`，防止刘海和底部手势条遮挡内容。
